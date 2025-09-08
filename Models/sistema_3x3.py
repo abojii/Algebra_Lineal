@@ -156,6 +156,81 @@ def eliminacion_3x3(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3):
     x = (d1 - b1 * y - c1 * z) / a1
     return x, y, z
 
+def gauss_jordan(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3):
+    Fila1 = [a1, b1, c1]
+    Fila2 = [a2, b2, c2]
+    Fila3 = [a3, b3, c3]
+    a1 = [Fila1, Fila2, Fila3]
+    
+    b1 = [d1, d2, d3]
+    
+    def OperacionesGauss(A, b):
+        n = 3
+
+        for i in range(n):
+            A[i].append(b[i])
+    
+        for i in range(n):
+            # Buscar pivote
+            pivot = A[i][i]
+            if pivot == 0:
+                raise ValueError("Pivote cero, el sistema puede no tener solución única")
+        
+        # Dividir toda la fila por el pivote para hacer el pivote 1
+        for k in range(i, n+1):
+            A[i][k] /= pivot
+        
+        # Hacer ceros en toda la columna i excepto en la fila i
+        for j in range(n):
+            if j != i:
+                factor = A[j][i]
+                for k in range(i, n+1):
+                    A[j][k] -= factor * A[i][k]
+    
+        # Ahora la matriz aumentada tiene la forma [I | x]
+        x = A[0][n]
+        y = A[1][n]
+        z = A[2][n]
+        return x, y, z
+
+    return OperacionesGauss(a1, b1)
+
+def gauss(a1, b1, c1, d1, a2, b2, c2, d2, a3, b3, c3, d3):
+    Fila1 = [a1, b1, c1]
+    Fila2 = [a2, b2, c2]
+    Fila3 = [a3, b3, c3]
+    a1 = [Fila1, Fila2, Fila3]
+    
+    b1 = [d1, d2, d3]
+    
+    def OperacionesGauss1(A, b):
+        n = 3
+
+        for i in range(n):
+            A[i].append(b[i])
+    
+        for i in range(n):
+            # Buscar pivote
+            pivot = A[i][i]
+            if pivot == 0:
+                raise ValueError("Pivote cero, el sistema puede no tener solución única")
+
+            for j in range(i + 1, n):
+                factor = A[j][i] / pivot
+                for k in range(i, n+1):
+                    A[j][k] -= factor * A[i][k]
+        # Dividir toda la fila por el pivote para hacer el pivote 1
+        x = [0 for _ in range(n)]
+        for i in range(n-1, -1, -1):
+            suma = 0
+            for j in range(i+1, n):
+                suma += A[i][j] * x[j]
+            x[i] = (A[i][n] - suma) / A[i][i]
+        
+        return tuple(x)
+
+    return OperacionesGauss1(a1, b1)
+
 def main():
     """
     Función principal del programa.
