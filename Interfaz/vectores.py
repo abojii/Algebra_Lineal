@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from Interfaz.vertorequalsolver import VectorEquationSolver
+from Interfaz.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI
 import re
 
 COLOR_BG = "#1e1e2f"
@@ -316,8 +317,8 @@ class Vectores:
                 self.sub_frames[name] = tk.Frame(self.sub_content_frame, bg=COLOR_BG)
                 VectorEquationSolver(self.sub_frames[name])
             elif name == "sub2":
-                self.sub_frames[name] = tk.Frame(self.sub_content_frame, bg=COLOR_BG)
-                SubVentana2(self.sub_frames[name])
+                self.sub_frames[name] = tk.Frame(self.sub_content_frame,)
+                VectorAlgebraPropertiesGUI(self.sub_frames[name])
             else:
                 return
         

@@ -126,7 +126,7 @@ class MainApp(tk.Tk):
         # Opciones del menú (puedes agregar más)
         self.sub_menu.add_command(label="Matriz-Vector (Ax)", command=lambda: self.change_subframe("principal"))
         self.sub_menu.add_command(label="Ecucaion Vectorial", command=lambda: self.change_subframe("sub1"))
-        self.sub_menu.add_command(label="Sub-Ventana 2", command=lambda: self.change_subframe("sub2"))
+        self.sub_menu.add_command(label="Propiedades algebraicas de ℝⁿ", command=lambda: self.change_subframe("sub2"))
         self.sub_menu.add_separator()
         self.sub_menu.add_command(label="Salir de Sub-Menú", command=self.clear_menu)  # Opcional: ocultar menú
         
