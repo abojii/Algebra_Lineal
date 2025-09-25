@@ -154,6 +154,13 @@ class SubVentanaPrincipal:
             messagebox.showerror("Error", "Las dimensiones no coinciden: columnas de A deben igualar filas de x.")
             return
         
+        b = self.read_vector()  # Asume que agregas este método similar a read_vector, pero para m elementos
+        if b is None:
+            return
+        if len(b) != n:
+            messagebox.showerror("Error", "b debe tener longitud m (filas de A).")
+            return
+        
         # Calcular Ax usando regla fila-vector (producto punto por fila)
         result = []
         for i in range(m):
@@ -165,28 +172,28 @@ class SubVentanaPrincipal:
         # Mostrar resultado con paso a paso
         self.display_result(A, x, result)
     
-    def display_result(self, A, x, result):
+    def display_result(self, A, x, result):  # sourcery skip: low-code-quality
         if self.result_frame:
             self.result_frame.destroy()
-        
+
         self.result_frame = tk.LabelFrame(self.parent, text="Resultado: Producto Matriz-Vector Ax (Paso a Paso)", padx=10, pady=10)
         self.result_frame.pack(pady=10, padx=10, fill="both", expand=True)
-        
+
         m = len(A)
         n = len(A[0])
-        
+
         result_text = tk.Text(self.result_frame, height=20, width=80, wrap=tk.WORD)  # Aumenté el tamaño para más contenido
         result_text.pack(fill="both", expand=True)
-        
+
         # Scrollbar para el texto si es necesario
         scrollbar = tk.Scrollbar(self.result_frame, orient=tk.VERTICAL, command=result_text.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         result_text.config(yscrollcommand=scrollbar.set)
-        
-        result_str = "=== PRODUCTO MATRIZ-VECTOR Ax (Regla Fila-Vector) ===\n\n"
-        
-        # Mostrar Matriz A
-        result_str += "Matriz A (m x n):\n"
+
+        result_str = (
+            "=== PRODUCTO MATRIZ-VECTOR Ax (Regla Fila-Vector) ===\n\n"
+            + "Matriz A (m x n):\n"
+        )
         for i in range(m):
             row_str = "  [ "
             for j in range(n):
@@ -194,7 +201,7 @@ class SubVentanaPrincipal:
             row_str += "]\n"
             result_str += row_str
         result_str += "\n"
-        
+
         # Mostrar Vector x
         result_str += "Vector x (n x 1):\n"
         result_str += "  [ "
@@ -203,7 +210,7 @@ class SubVentanaPrincipal:
             if j < n - 1:
                 result_str += "\n    "
         result_str += "]\n\n"
-        
+
         # Paso a paso para cada fila
         result_str += "Cálculo paso a paso (producto punto por fila):\n\n"
         for i in range(m):
@@ -212,19 +219,19 @@ class SubVentanaPrincipal:
             for j in range(n):
                 result_str += f"{A[i][j]:.6f} "
             result_str += "]\n"
-            
-            result_str += f"Vector x:      [ "
+
+            result_str += "Vector x:      [ "
             for j in range(n):
                 result_str += f"{x[j]:.6f} "
             result_str += "]\n\n"
-            
+
             result_str += "Productos individuales (A[i,j] * x[j]):\n"
             products = []
             for j in range(n):
                 prod = A[i][j] * x[j]
                 products.append(prod)
                 result_str += f"  A[{i+1},{j+1}] * x[{j+1}] = {A[i][j]:.6f} * {x[j]:.6f} = {prod:.6f}\n"
-            
+
             # Suma
             total = sum(products)
             result_str += f"\nSuma: {products[0]:.6f}"
@@ -232,17 +239,74 @@ class SubVentanaPrincipal:
                 result_str += f" + {products[j]:.6f}"
             result_str += f" = {total:.6f}\n\n"
             result_str += f"Por lo tanto, Ax[{i+1}] = {total:.6f}\n\n"
-        
+
         # Vector resultado final
         result_str += "Vector resultado Ax:\n"
         result_str += "Ax = [\n"
         for i, val in enumerate(result):
             result_str += f"  {val:.6f}\n" if i < m - 1 else f"  {val:.6f}\n"
         result_str += "]\n"
-        
+
+        #(verificación con b calculado)
+        m = len(A)
+        n = len(A[0])
+        result_str += self.is_linear_combination(A, result) + "\n"  # Llama la función con b = result
+        result_str += "Coeficientes de la combinación: los elementos de x = ["
+        for j in range(n):
+            result_str += f"{x[j]:.6f}"
+            if j < n - 1:
+                result_str += ", "
+        result_str += "].\n"
+
         result_text.insert(tk.END, result_str)
         result_text.config(state=tk.DISABLED)
-    
+        
+    def is_linear_combination(self, A, b):
+        m = len(A)
+        n = len(A[0])
+        if len(b) != m:
+            return f"No, dimensiones incompatibles: b debe tener {m} elementos."
+
+        # Matriz aumentada [A | b]
+        aug = [A[i][:] + [b[i]] for i in range(m)]
+
+        # Tolerancia numérica para flotantes
+        tol = 1e-10
+
+        # Eliminación gaussiana hacia adelante con pivoteo parcial
+        row = 0
+        col = 0
+        while row < m and col < n:
+            # Pivoteo: fila con mayor abs en col
+            max_row = row
+            for k in range(row + 1, m):
+                if abs(aug[k][col]) > abs(aug[max_row][col]):
+                    max_row = k
+            # Intercambio
+            aug[row], aug[max_row] = aug[max_row], aug[row]
+
+            # Si pivote ~0, salta col
+            if abs(aug[row][col]) < tol:
+                col += 1
+                continue
+
+            # Eliminar debajo
+            for k in range(row + 1, m):
+                factor = aug[k][col] / aug[row][col]
+                for j in range(col, n + 1):
+                    aug[k][j] -= factor * aug[row][j]
+
+            row += 1
+            col += 1
+
+        # Verificar consistencia en filas restantes
+        for i in range(row, m):
+            all_zero = all(abs(aug[i][j]) < tol for j in range(n))
+            if all_zero and abs(aug[i][n]) > tol:
+                return ":b no es una combinación lineal de las columnas de A (sistema Ax = b inconsistente)."
+
+        return ":b es una combinación lineal de las columnas de A (sistema Ax = b consistente; existe solución x)."
+
     def clear_all(self):
         if self.matrix_frame:
             self.matrix_frame.destroy()
@@ -252,11 +316,8 @@ class SubVentanaPrincipal:
             self.result_frame.destroy()
         self.matrix_entries = []
         self.vector_entries = []
-        # Limpiar entradas de dimensiones si es necesario, pero mantener valores por defecto
         
-
         
-
 class SubVentana1:
     """Ejemplo de sub-ventana 1 (se abre desde el menú)."""
     def __init__(self, parent):

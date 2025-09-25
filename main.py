@@ -102,12 +102,10 @@ class MainApp(tk.Tk):
         # Ocultar todos los frames
         for f in self.frames.values():
             f.pack_forget()
-        
-        # Mostrar el frame seleccionado
-        frame = self.frames.get(name)
-        if frame:
+
+        if frame := self.frames.get(name):
             frame.pack(fill="both", expand=True)
-            
+
             # Configurar menú dinámicamente
             if name == "otra":
                 self.setup_sub_menu()  # Crea/actualiza menú para sub-ventanas
