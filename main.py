@@ -1,7 +1,8 @@
 import tkinter as tk
+from tkinter import ttk, messagebox
 import os
 import sys
-from Interfaz.sistema_ecuaciones import SistemaEcuacionesApp
+from Interfaz import sistema_ecuaciones
 from Interfaz.vectores import Vectores
 from Interfaz.vectores import SubVentana1,SubVentana2
 
@@ -19,6 +20,147 @@ project_root = os.path.dirname(__file__)
 sys.path.insert(0, project_root)
 sys.path.insert(0, os.path.join(project_root, 'Interfaz'))
 
+# clase de la calculadora de sistemas(la interfaz Tkinter)
+class SistemaEcuacionesApp:
+    def __init__(self, parent):
+        self.parent = parent
+        self.parent.configure(bg=COLOR_BG)
+        self.metodo_var = tk.StringVar(value="gauss")
+
+        titulo = tk.Label(parent, text="Calculadora de Álgebra Lineal",
+                          font=("Segoe UI", 18, "bold"),
+                          fg=COLOR_BUTTON, bg=COLOR_BG)
+        titulo.pack(pady=10)
+
+        subtitulo = tk.Label(parent,
+                             text="Resuelve sistemas de ecuaciones lineales",
+                             font=("Segoe UI", 10),
+                             fg=COLOR_SUBTEXT, bg=COLOR_BG)
+        subtitulo.pack()
+
+        frame_config = tk.Frame(parent, bg=COLOR_FRAME, bd=1, relief="solid")
+        frame_config.pack(fill="x", padx=20, pady=15)
+
+        tk.Label(frame_config, text="Tamaño de la Matriz:",
+                 fg=COLOR_SUBTEXT, bg=COLOR_FRAME).grid(row=0, column=0, padx=10, pady=10)
+
+        self.matriz_combo = ttk.Combobox(frame_config, values=["2x2", "3x3", "4x4"], width=10)
+        self.matriz_combo.set("2x2")
+        self.matriz_combo.grid(row=0, column=1, padx=5, pady=10)
+
+        ttk.Button(frame_config, text="Generar", command=self.generar_campos).grid(row=0, column=2, padx=5)
+        ttk.Button(frame_config, text="Resolver", command=self.resolver).grid(row=0, column=3, padx=5)
+        ttk.Button(frame_config, text="Limpiar", command=self.limpiar).grid(row=0, column=4, padx=5)
+
+        frame_metodos = tk.LabelFrame(parent, bg=COLOR_FRAME, bd=1, relief="solid")
+        frame_metodos.pack(padx=20, pady=1, fill="x")
+
+        tk.Label(frame_metodos, text="Método de resolución", fg=COLOR_SUBTEXT, bg=COLOR_FRAME).grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 5))
+
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Eliminación Gaussiana",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="gauss", padx=10).grid(row=1, column=0, sticky='w', padx=5, pady=2)
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Eliminación Gauss-Jordan",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="gaussjordan", padx=10).grid(row=2, column=0, sticky='w', padx=5, pady=2)
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Escalonada Matriz",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="Escalonada Matriz", padx=10).grid(row=3, column=0, sticky='w', padx=5, pady=2)
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Escalonada Reducida Matriz",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="Escalonada Reducida", padx=10).grid(row=1, column=1, sticky='w', padx=5, pady=2)
+
+        self.frame_sistema = tk.Frame(parent, bg=COLOR_FRAME, bd=1, relief="solid")
+        self.frame_sistema.pack(fill="both", padx=20, pady=15, expand=True)
+
+        self.entries = []
+        # Frame para resultados
+        frame_result = tk.LabelFrame(parent, text="Resultado", fg=COLOR_SUBTEXT, bg=COLOR_FRAME)
+        frame_result.pack(padx=20, pady=10, fill="both", expand=True)
+
+        # Cuadro de texto con scrollbar
+        self.result_text = tk.Text(frame_result, height=15, bg=COLOR_BG, fg=COLOR_TEXT,
+                           insertbackground="white", wrap="word")
+        self.result_text.pack(side="left", fill="both", expand=True)
+
+        scroll = tk.Scrollbar(frame_result, command=self.result_text.yview)
+        scroll.pack(side="right", fill="y")
+        self.result_text.config(yscrollcommand=scroll.set)
+
+
+
+
+
+    def generar_campos(self):
+        for widget in self.frame_sistema.winfo_children():
+            widget.destroy()
+        self.entries = []
+
+        dim_text = self.matriz_combo.get().lower().replace(" ", "")
+        try:
+            filas_str, columnas_str = dim_text.split("x")
+            filas = int(filas_str)
+            columnas = int(columnas_str)
+        except Exception:
+            messagebox.showerror("Error", "Formato inválido. Use 'filas x columnas'.")
+            return
+
+        tk.Label(self.frame_sistema, text=f"Ingrese los coeficientes de A ({filas}x{columnas}) y b ({filas}x1):",
+                 fg=COLOR_SUBTEXT, bg=COLOR_FRAME).pack(anchor="w", padx=10, pady=5)
+
+        grid = tk.Frame(self.frame_sistema, bg=COLOR_FRAME)
+        grid.pack(pady=10)
+
+        for i in range(filas):
+            fila = []
+            for j in range(columnas):
+                e = tk.Entry(grid, width=5, bg=COLOR_ENTRY, fg=COLOR_TEXT,
+                             insertbackground="white", justify="center")
+                e.grid(row=i, column=j, padx=5, pady=5)
+                fila.append(e)
+            e = tk.Entry(grid, width=5, bg=COLOR_ENTRY, fg=COLOR_TEXT,
+                         insertbackground="white", justify="center")
+            e.grid(row=i, column=columnas, padx=5, pady=5)
+            fila.append(e)
+            self.entries.append(fila)
+
+    def resolver(self):
+        metodo = self.metodo_var.get()
+        if not self.entries:
+            messagebox.showwarning("Atención", "Primero genera el sistema.")
+            return
+        try:
+            filas = len(self.entries)
+            columnas = len(self.entries[0]) - 1
+            A = []
+            b = []
+            for fila in self.entries:
+                A.append([float(fila[j].get()) for j in range(columnas)])
+                b.append(float(fila[columnas].get()))
+
+            pasos, solucion, clasificacion = [], None, ""
+
+            if metodo == "gauss":
+                pasos, solucion, clasificacion = sistema_ecuaciones.gauss(A, b)
+            elif metodo == "gaussjordan":
+                pasos, solucion, clasificacion = sistema_ecuaciones.gauss_jordan(A, b)
+            elif metodo == "Escalonada Matriz":
+                pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada(A, b)
+            elif metodo == "Escalonada Reducida":
+                pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada_reducida(A, b)
+
+            resultado = "\n".join(pasos)
+            if solucion is not None:
+                resultado += f"\n\nSolución: {solucion}"
+            resultado += f"\n\nClasificación: {clasificacion}"
+
+            self.result_text.delete(1.0, tk.END)   # Limpia antes de mostrar
+            self.result_text.insert(tk.END, resultado)
+
+        except ValueError:
+         messagebox.showerror("Error", "Por favor ingrese solo números.")
+
+    def limpiar(self):
+        for widget in self.frame_sistema.winfo_children():
+            widget.destroy()
+        self.entries = []
+        self.result_text.delete(1.0, tk.END)
 
 
 class MainApp(tk.Tk):
@@ -157,3 +299,6 @@ class MainApp(tk.Tk):
 if __name__ == "__main__":
     app = MainApp()
     app.mainloop()
+
+
+
