@@ -83,10 +83,6 @@ class SistemaEcuacionesApp:
         scroll.pack(side="right", fill="y")
         self.result_text.config(yscrollcommand=scroll.set)
 
-
-
-
-
     def generar_campos(self):
         for widget in self.frame_sistema.winfo_children():
             widget.destroy()
@@ -126,35 +122,38 @@ class SistemaEcuacionesApp:
             messagebox.showwarning("Atención", "Primero genera el sistema.")
             return
         try:
-            filas = len(self.entries)
-            columnas = len(self.entries[0]) - 1
-            A = []
-            b = []
-            for fila in self.entries:
-                A.append([float(fila[j].get()) for j in range(columnas)])
-                b.append(float(fila[columnas].get()))
-
-            pasos, solucion, clasificacion = [], None, ""
-
-            if metodo == "gauss":
-                pasos, solucion, clasificacion = sistema_ecuaciones.gauss(A, b)
-            elif metodo == "gaussjordan":
-                pasos, solucion, clasificacion = sistema_ecuaciones.gauss_jordan(A, b)
-            elif metodo == "Escalonada Matriz":
-                pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada(A, b)
-            elif metodo == "Escalonada Reducida":
-                pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada_reducida(A, b)
-
-            resultado = "\n".join(pasos)
-            if solucion is not None:
-                resultado += f"\n\nSolución: {solucion}"
-            resultado += f"\n\nClasificación: {clasificacion}"
-
-            self.result_text.delete(1.0, tk.END)   # Limpia antes de mostrar
-            self.result_text.insert(tk.END, resultado)
-
+            self._extracted_from_resolver_7(metodo)
         except ValueError:
          messagebox.showerror("Error", "Por favor ingrese solo números.")
+
+    # TODO Rename this here and in `resolver`
+    def _extracted_from_resolver_7(self, metodo):
+        filas = len(self.entries)
+        columnas = len(self.entries[0]) - 1
+        A = []
+        b = []
+        for fila in self.entries:
+            A.append([float(fila[j].get()) for j in range(columnas)])
+            b.append(float(fila[columnas].get()))
+
+        pasos, solucion, clasificacion = [], None, ""
+
+        if metodo == "gauss":
+            pasos, solucion, clasificacion = sistema_ecuaciones.gauss(A, b)
+        elif metodo == "gaussjordan":
+            pasos, solucion, clasificacion = sistema_ecuaciones.gauss_jordan(A, b)
+        elif metodo == "Escalonada Matriz":
+            pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada(A, b)
+        elif metodo == "Escalonada Reducida":
+            pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada_reducida(A, b)
+
+        resultado = "\n".join(pasos)
+        if solucion is not None:
+            resultado += f"\n\nSolución: {solucion}"
+        resultado += f"\n\nClasificación: {clasificacion}"
+
+        self.result_text.delete(1.0, tk.END)   # Limpia antes de mostrar
+        self.result_text.insert(tk.END, resultado)
 
     def limpiar(self):
         for widget in self.frame_sistema.winfo_children():
@@ -267,6 +266,7 @@ class MainApp(tk.Tk):
         self.sub_menu.add_command(label="Matriz-Vector (Ax)", command=lambda: self.change_subframe("principal"))
         self.sub_menu.add_command(label="Ecucaion Vectorial", command=lambda: self.change_subframe("sub1"))
         self.sub_menu.add_command(label="Propiedades algebraicas de ℝⁿ", command=lambda: self.change_subframe("sub2"))
+        self.sub_menu.add_command(label="Ecuaciones Homogenias",command=lambda: self.change_subframe("sub3"))
         self.sub_menu.add_separator()
         self.sub_menu.add_command(label="Salir de Sub-Menú", command=self.clear_menu)  # Opcional: ocultar menú
         

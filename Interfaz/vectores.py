@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+from Interfaz import homogeneo
 from Interfaz.vertorequalsolver import VectorEquationSolver
 from Interfaz.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI
 import re
@@ -380,6 +381,9 @@ class Vectores:
             elif name == "sub2":
                 self.sub_frames[name] = tk.Frame(self.sub_content_frame,)
                 VectorAlgebraPropertiesGUI(self.sub_frames[name])
+            elif name == "sub3":
+                self.sub_frames[name] = tk.Frame(self.sub_content_frame,)
+                homogeneo.LinearSystemSolver(self.sub_frames[name])
             else:
                 return
         
