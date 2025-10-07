@@ -5,6 +5,8 @@ import sys
 from Interfaz import sistema_ecuaciones
 from Interfaz.vectores import Vectores
 from Interfaz.vectores import SubVentana1,SubVentana2
+from Models.metodos import rank
+from Models.sistema import es_homogeneo
 
 COLOR_BG = "#1e1e2f"
 COLOR_FRAME = "#2b2b40"
@@ -19,6 +21,7 @@ COLOR_ENTRY = "#3a3a4f"
 project_root = os.path.dirname(__file__)
 sys.path.insert(0, project_root)
 sys.path.insert(0, os.path.join(project_root, 'Interfaz'))
+sys.path.insert(0, os.path.join(project_root, 'Models'))
 
 # clase de la calculadora de sistemas(la interfaz Tkinter)
 class SistemaEcuacionesApp:
@@ -65,6 +68,10 @@ class SistemaEcuacionesApp:
                        variable=self.metodo_var, selectcolor=COLOR_FRAME, value="Escalonada Matriz", padx=10).grid(row=3, column=0, sticky='w', padx=5, pady=2)
         tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Escalonada Reducida Matriz",
                        variable=self.metodo_var, selectcolor=COLOR_FRAME, value="Escalonada Reducida", padx=10).grid(row=1, column=1, sticky='w', padx=5, pady=2)
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Identificar si es homogéneo",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="homogeneo", padx=10).grid(row=4, column=0, sticky='w', padx=5, pady=2)
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Identificar si tiene dependencia",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="dependencia", padx=10).grid(row=5, column=0, sticky='w', padx=5, pady=2)
 
         self.frame_sistema = tk.Frame(parent, bg=COLOR_FRAME, bd=1, relief="solid")
         self.frame_sistema.pack(fill="both", padx=20, pady=15, expand=True)
@@ -144,6 +151,25 @@ class SistemaEcuacionesApp:
                 pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada(A, b)
             elif metodo == "Escalonada Reducida":
                 pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada_reducida(A, b)
+            elif metodo == "homogeneo":
+                matriz_aumentada = [A[i] + [b[i]] for i in range(len(A))]
+                if es_homogeneo(matriz_aumentada):
+                    resultado = "El sistema es homogéneo."
+                else:
+                    resultado = "El sistema no es homogéneo."
+                self.result_text.delete(1.0, tk.END)
+                self.result_text.insert(tk.END, resultado)
+                return  # Since it's not using pasos, etc.
+
+            elif metodo == "dependencia":
+                r = rank(A)
+                if r < filas:
+                    resultado = "El sistema tiene ecuaciones dependientes."
+                else:
+                    resultado = "El sistema no tiene ecuaciones dependientes."
+                self.result_text.delete(1.0, tk.END)
+                self.result_text.insert(tk.END, resultado)
+                return
 
             resultado = "\n".join(pasos)
             if solucion is not None:

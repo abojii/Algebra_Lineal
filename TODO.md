@@ -1,0 +1,5 @@
+- [x] Add radiobutton for "Identificar si es homogéneo" in frame_metodos of SistemaEcuacionesApp in main.py
+- [x] Add elif case for metodo == "homogeneo" in resolver method: import es_homogeneo, build augmented matrix, check homogeneity, display result in result_text
+- [x] Test the interface to verify the homogeneo option appears and works correctly (function tested, GUI execution successful)
+- [x] Change radiobutton for dependencia to "Identificar si tiene dependencia" and logic to check rank(A) < filas for dependent equations
+- [x] Move imports to top in main.py to avoid issues

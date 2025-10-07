@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from Models.metodos import rank
+from Models.sistema import es_homogeneo
 COLOR_BG = "#1e1e2f"
 COLOR_FRAME = "#2b2b40"
 COLOR_TEXT = "#ffffff"
@@ -57,6 +59,10 @@ class SistemaEcuacionesApp:
                        variable=self.metodo_var, selectcolor=COLOR_FRAME, value="Escalonada Matriz", padx=10).grid(row=3, column=0, sticky='w', padx=5, pady=2)
         tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Escalonada Reducida Matriz",
                        variable=self.metodo_var, selectcolor=COLOR_FRAME, value="Escalonada Reducida", padx=10).grid(row=1, column=1, sticky='w', padx=5, pady=2)  # Corregido: row=4 para evitar superposición
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Identificar si es homogéneo",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="homogeneo", padx=10).grid(row=5, column=0, sticky='w', padx=5, pady=2)
+        tk.Radiobutton(frame_metodos, bg=COLOR_FRAME, fg=COLOR_TEXT, text="Identificar si tiene dependencia",
+                       variable=self.metodo_var, selectcolor=COLOR_FRAME, value="dependencia", padx=10).grid(row=6, column=0, sticky='w', padx=5, pady=2)
 
         # Frame sistema de ecuaciones
         self.frame_sistema = tk.Frame(parent, bg=COLOR_FRAME, bd=1, relief="solid")
@@ -122,9 +128,21 @@ class SistemaEcuacionesApp:
             
             if metodo == "gauss":
                 messagebox.showinfo("Info", "Método Gauss implementado (pendiente de completar).")  # Corregido: showinfo en lugar de showerror
-            # Aquí puedes agregar lógica para otros métodos
-            
-            self.result_label.config(text=f"Matriz A: {A}\nVector b: {b}")  # Ejemplo de resultado básico
+            elif metodo == "homogeneo":
+                matriz_aumentada = [row + [b[i]] for i, row in enumerate(A)]
+                if es_homogeneo(matriz_aumentada):
+                    self.result_label.config(text="El sistema es homogéneo.")
+                else:
+                    self.result_label.config(text="El sistema no es homogéneo.")
+            elif metodo == "dependencia":
+                r = rank(A)
+                if r < filas:
+                    self.result_label.config(text="El sistema tiene ecuaciones dependientes.")
+                else:
+                    self.result_label.config(text="El sistema no tiene ecuaciones dependientes.")
+            else:
+                # Aquí puedes agregar lógica para otros métodos
+                self.result_label.config(text=f"Matriz A: {A}\nVector b: {b}")  # Ejemplo de resultado básico
             
         except ValueError:
             messagebox.showerror("Error", "Por favor ingrese solo números.")

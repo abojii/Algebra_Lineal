@@ -1,8 +1,20 @@
 # sistema.py
 # Funciones que identifican dimensión, solicitan coeficientes y llaman al método seleccionado
-import entrada
-import metodos
+from Models import entrada
+from Models import metodos
 from fractions import Fraction
+
+def es_homogeneo(matriz_aumentada):
+    # Verifica si la última columna es todo ceros para cualquier tamaño de matriz aumentada
+    if not matriz_aumentada or not matriz_aumentada[0]:
+        return False  # matriz vacía o inválida
+    for fila in matriz_aumentada:
+        if len(fila) < 2:
+            return False  # no es matriz aumentada válida
+        if fila[-1] != 0:
+            return False
+    return True
+
 def resolver_sistema():
     print("Seleccione el tipo de sistema a resolver:")
     print("1. Sistema 2x2")
@@ -13,6 +25,10 @@ def resolver_sistema():
             coef = entrada.solicitar_coeficientes_2x2()
             print("\nMatriz aumentada:")
             entrada.imprimir_matriz(coef)
+            if es_homogeneo(coef):
+                print("El sistema es homogéneo.")
+            else:
+                print("El sistema no es homogéneo.")
             confirm = input("¿Es correcta esta matriz? (si/no): ").lower()
             if confirm == 'si':
                 break
@@ -52,6 +68,10 @@ def resolver_sistema():
             coef = entrada.solicitar_coeficientes_3x3()
             print("\nMatriz aumentada:")
             entrada.imprimir_matriz(coef)
+            if es_homogeneo(coef):
+                print("El sistema es homogéneo.")
+            else:
+                print("El sistema no es homogéneo.")
             confirm = input("¿Es correcta esta matriz? (si/no): ").lower()
             if confirm == 'si':
                 break
@@ -64,7 +84,7 @@ def resolver_sistema():
         print("2. Eliminación")
         print("3. Gauss Jordan")
         print("4. Gauss")
-        metodo = input("Ingrese opción (1,2,3): ")
+        metodo = input("Ingrese opción (1,2,3,4): ")
         if metodo == "1":
             resultado = metodos.sustitucion_3x3(*coef[0], *coef[1], *coef[2])
             if resultado:
