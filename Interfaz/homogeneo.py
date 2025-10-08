@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import solverHomogeneo
-from solverHomogeneo import solve_linear_system# Importa la función principal del solver
+
+from Interfaz.solverHomogeneo import solve_linear_system# Importa la función principal del solver
 
 class LinearSystemSolver:
     def __init__(self, root):
         self.root = root
-        self.root.configure(bg='#f0f0f0')
+        self.root.configure(bg= "#2b2b40")
         
         # Variables
         self.num_rows = tk.IntVar(value=3)
