@@ -57,9 +57,17 @@ class LinearSystemSolver:
         ttk.Checkbutton(homo_frame, text="Sistema Homogéneo (b = 0)", variable=self.is_homogeneous,
                         command=self.toggle_homogeneous).pack(anchor=tk.W)
         
+        # Frame para botones alineados horizontalmente
+        button_frame = ttk.Frame(config_frame)
+        button_frame.pack(fill=tk.X, pady=5)
+        
         # Botón para inicializar matriz
-        init_btn = ttk.Button(config_frame, text="Inicializar Matrices", command=self.initialize_matrix)
-        init_btn.pack(pady=5)
+        init_btn = ttk.Button(button_frame, text="Inicializar Matrices", command=self.initialize_matrix)
+        init_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Botón para limpiar solución (al lado del inicializar)
+        clear_btn = ttk.Button(button_frame, text="Limpiar Solución", command=lambda: self.solution_text.delete(1.0, tk.END))
+        clear_btn.pack(side=tk.LEFT)
         
         # Entrada de Datos (abajo)
         input_frame = ttk.LabelFrame(left_frame, text="Entrada de Matriz y Vector", padding=10)
@@ -99,11 +107,11 @@ class LinearSystemSolver:
         
         # Frame derecho (solución) más grande y expandible
         right_frame = ttk.Frame(main_frame)
-        right_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 3))  # Usar grid para expansión
+        right_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 0))  # Usar grid para expansión
         right_frame.grid_rowconfigure(0, weight=1)      # Expande verticalmente
         right_frame.grid_columnconfigure(0, weight=1)   # Expande horizontalmente
         
-        solution_label_frame = ttk.LabelFrame(right_frame, text="Solución del Sistema", padding=5)
+        solution_label_frame = ttk.LabelFrame(right_frame, text="Solución del Sistema", padding=10)
         solution_label_frame.pack(fill=tk.BOTH, expand=True)  # O usa grid si prefieres
         # Configurar para expansión total
         solution_label_frame.grid_rowconfigure(0, weight=1)
@@ -121,11 +129,6 @@ class LinearSystemSolver:
         h_scrollbar = ttk.Scrollbar(solution_label_frame, orient=tk.HORIZONTAL, command=self.solution_text.xview)
         h_scrollbar.grid(row=1, column=0, sticky="ew")
         self.solution_text.config(xscrollcommand=h_scrollbar.set)
-        
-        # Botón en la parte inferior del left_frame (sin función de resolución; puedes agregar lógica aquí si quieres)
-        # resolve_btn = ttk.Button(left_frame, text="Resolver Sistema", command=self.solve_system)  # Comentado: sin resolución
-        clear_btn = ttk.Button(left_frame, text="Resolver Sistema", command=lambda: self.solution_text.delete(1.0, tk.END))
-        clear_btn.pack(pady=10)
         
         # Inicializar con valores por defecto
         self.initialize_matrix()
