@@ -1,27 +1,20 @@
-import tkinter as tk
-from tkinter import messagebox, ttk
-from Interfaz import homogeneo
-from Interfaz.vertorequalsolver import VectorEquationSolver
-from Interfaz.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI
-import re
-
-COLOR_BG = "#1e1e2f"
-COLOR_FRAME = "#2b2b40"
-COLOR_TEXT = "#ffffff"
-COLOR_SUBTEXT = "#bbbbbb"
-COLOR_BUTTON = "#3b82f6"
-COLOR_ENTRY = "#3a3a4f"
+import customtkinter as ctk
+from tkinter import messagebox
+import re  # Mantenido si se usa en otros módulos
+from constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY  # Import relativo desde config.py
+from Interfaz import homogeneo  # Asumiendo que está en Interfaz/
+from Interfaz.vertorequalsolver import VectorEquationSolver  # Adáptalo si usa Tkinter
+from Interfaz.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI  # Adáptalo si usa Tkinter
 
 class SubVentanaPrincipal:
-    """Sub-ventana principal (la que se muestra por defecto en 'Otra Opción')."""
+    """Sub-ventana principal (la que se muestra por defecto en 'Vectores')."""
     def __init__(self, parent):
         self.parent = parent
-        self.parent.configure(bg=COLOR_BG)
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
         
         # Variables para dimensiones
-        self.m_var = tk.IntVar(value=2)  # Filas de A
-        self.n_var = tk.IntVar(value=2)  # Columnas de A (filas de x)
-        
+        self.m_var = ctk.IntVar(value=2)  # Filas de A
+        self.n_var = ctk.IntVar(value=2)  # Columnas de A (filas de x)
         
         # Frames para secciones
         self.create_dimension_frame()
@@ -29,40 +22,45 @@ class SubVentanaPrincipal:
         self.matrix_frame = None
         self.vector_frame = None
         self.result_frame = None
-        self.result_text = None
+        self.result_text = None  # Inicializado como None; se crea en display_result
         
         # Almacenamiento de entradas
         self.matrix_entries = []
         self.vector_entries = []
         
     def create_dimension_frame(self):
-        titulo = tk.Label(self.parent, text= "Matriz-Vector (Ax)",
-                          bg= COLOR_BG, fg= COLOR_TEXT,
-                          font=("Segoe UI", 14, "bold")).pack(anchor= "center",padx=10,pady=5)
+        titulo = ctk.CTkLabel(self.parent, text="Matriz-Vector (Ax)",
+                              text_color=COLOR_TEXT, fg_color="transparent",
+                              font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"))
+        titulo.pack(anchor="center", padx=10, pady=5)
         
-        dim_frame = tk.LabelFrame(self.parent,bg= COLOR_FRAME,bd=1,relief="solid", padx=10, pady=10)
+        dim_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
         dim_frame.pack(pady=10, padx=10, fill="x")
         
-        tk.Label(dim_frame, text= "Dimenciones",fg= COLOR_TEXT,bg= COLOR_FRAME).grid(row=0, column=0, sticky="w")
+        ctk.CTkLabel(dim_frame, text="Dimensiones", text_color=COLOR_TEXT, fg_color="transparent").grid(row=0, column=0, sticky="w", padx=10, pady=10)
+        
         # Filas de matriz
-        tk.Label(dim_frame,bg= COLOR_FRAME,fg= COLOR_SUBTEXT,text="Filas de A (m):").grid(row=1, column=0, sticky="w")
-        tk.Entry(dim_frame, textvariable=self.m_var, width=5).grid(row=1, column=1)
+        ctk.CTkLabel(dim_frame, text="Filas de A (m):", text_color=COLOR_SUBTEXT, fg_color="transparent").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        m_entry = ctk.CTkEntry(dim_frame, textvariable=self.m_var, width=60, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT)
+        m_entry.grid(row=1, column=1, padx=5, pady=5)
         
         # Columnas de matriz (filas de vector)
-        tk.Label(dim_frame,bg= COLOR_FRAME,fg= COLOR_SUBTEXT, text="Columnas de A / Filas de x (n):").grid(row=2, column=0, sticky="w")
-        tk.Entry(dim_frame, textvariable=self.n_var, width=5).grid(row=2, column=1)
+        ctk.CTkLabel(dim_frame, text="Columnas de A / Filas de x (n):", text_color=COLOR_SUBTEXT, fg_color="transparent").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        n_entry = ctk.CTkEntry(dim_frame, textvariable=self.n_var, width=60, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT)
+        n_entry.grid(row=2, column=1, padx=5, pady=5)
         
     def create_generate_buttons_frame(self):
-        btn_frame = tk.Frame(self.parent, bg= COLOR_FRAME)
+        btn_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
         btn_frame.pack(pady=10)
         
-        tk.Button(btn_frame, text="Generar Entradas para Matriz A", command=self.generate_matrix_entries,
-                  bg=COLOR_BUTTON).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="Generar Entradas para Vector x", command=self.generate_vector_entries,
-                  bg=COLOR_BUTTON).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="Calcular Ax", command=self.compute_product, bg="lightgreen").pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_frame, text="Limpiar", command=self.clear_all, bg="lightcoral").pack(side=tk.LEFT, padx=5)
-        
+        ctk.CTkButton(btn_frame, text="Generar Entradas para Matriz A", command=self.generate_matrix_entries,
+                      fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30).pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="Generar Entradas para Vector x", command=self.generate_vector_entries,
+                      fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30).pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="Calcular Ax", command=self.compute_product,
+                      fg_color="#4ade80", text_color="black", corner_radius=5, height=30).pack(side="left", padx=5)  # Verde claro para "éxito"
+        ctk.CTkButton(btn_frame, text="Limpiar", command=self.clear_all,
+                      fg_color="#f87171", text_color="white", corner_radius=5, height=30).pack(side="left", padx=5)  # Rojo claro
         
     def generate_matrix_entries(self):
         m = self.m_var.get()
@@ -76,14 +74,19 @@ class SubVentanaPrincipal:
             self.matrix_frame.destroy()
         self.matrix_entries = []
         
-        self.matrix_frame = tk.LabelFrame(self.parent,fg= COLOR_TEXT, text=f"Matriz A ({m} x {n})",bg= COLOR_FRAME,bd= 1, relief= "solid", padx=10, pady=10)
+        self.matrix_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
+        ctk.CTkLabel(self.matrix_frame, text=f"Matriz A ({m} x {n})", text_color=COLOR_TEXT, fg_color="transparent",
+                     font=ctk.CTkFont(size=12, weight="bold")).pack(anchor="w", padx=10, pady=5)
         self.matrix_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        
+        grid = ctk.CTkFrame(self.matrix_frame, fg_color=COLOR_FRAME, corner_radius=0)
+        grid.pack(pady=5, padx=10)
         
         for i in range(m):
             row_entries = []
             for j in range(n):
-                entry = tk.Entry(self.matrix_frame, width=5)
-                entry.grid(row=i, column=j, padx=1, pady=1)
+                entry = ctk.CTkEntry(grid, width=60, height=30, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT, corner_radius=5)
+                entry.grid(row=i, column=j, padx=2, pady=2)
                 row_entries.append(entry)
             self.matrix_entries.append(row_entries)
     
@@ -98,13 +101,17 @@ class SubVentanaPrincipal:
             self.vector_frame.destroy()
         self.vector_entries = []
         
-        self.vector_frame = tk.LabelFrame(self.parent, text=f"Vector x ({n} x 1)",
-                                          bg= COLOR_FRAME,bd=1,relief="solid", fg= COLOR_TEXT, padx=10, pady=10)
+        self.vector_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
+        ctk.CTkLabel(self.vector_frame, text=f"Vector x ({n} x 1)", text_color=COLOR_TEXT, fg_color="transparent",
+                     font=ctk.CTkFont(size=12, weight="bold")).pack(anchor="w", padx=10, pady=5)
         self.vector_frame.pack(pady=10, padx=10, fill="x")
         
+        grid = ctk.CTkFrame(self.vector_frame, fg_color=COLOR_FRAME, corner_radius=0)
+        grid.pack(pady=5, padx=10)
+        
         for i in range(n):
-            entry = tk.Entry(self.vector_frame, width=5)
-            entry.grid(row=i, column=0, padx=5, pady=1)
+            entry = ctk.CTkEntry(grid, width=60, height=30, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT, corner_radius=5)
+            entry.grid(row=i, column=0, padx=5, pady=2)
             self.vector_entries.append(entry)
     
     def read_matrix(self):
@@ -116,14 +123,15 @@ class SubVentanaPrincipal:
             for j in range(n):
                 val_str = self.matrix_entries[i][j].get().strip()
                 if not val_str:
-                    messagebox.showerror("Error", f"Elemento A[{i+1}][{j+1}] vacío.")
+                    messagebox.showerror("Error", f"Elemento A[{i+1}][{j+1}] vacío. Llena todas las entradas.")
                     return None
                 try:
                     row.append(float(val_str))
                 except ValueError:
-                    messagebox.showerror("Error", f"Elemento A[{i+1}][{j+1}] no es numérico: {val_str}")
+                    messagebox.showerror("Error", f"Elemento A[{i+1}][{j+1}] no es numérico: '{val_str}'. Usa números (ej. 1.5).")
                     return None
             A.append(row)
+        print(f"DEBUG: Matriz A leída correctamente: {A}")  # Depuración opcional
         return A
     
     def read_vector(self):
@@ -132,34 +140,31 @@ class SubVentanaPrincipal:
         for i in range(n):
             val_str = self.vector_entries[i].get().strip()
             if not val_str:
-                messagebox.showerror("Error", f"Elemento x[{i+1}] vacío.")
+                messagebox.showerror("Error", f"Elemento x[{i+1}] vacío. Llena todas las entradas.")
                 return None
             try:
                 x.append(float(val_str))
             except ValueError:
-                messagebox.showerror("Error", f"Elemento x[{i+1}] no es numérico: {val_str}")
+                messagebox.showerror("Error", f"Elemento x[{i+1}] no es numérico: '{val_str}'. Usa números (ej. 1.5).")
                 return None
+        print(f"DEBUG: Vector x leído correctamente: {x}")  # Depuración opcional
         return x
     
     def compute_product(self):
+        print("DEBUG: Iniciando compute_product")  # Depuración
         A = self.read_matrix()
         if A is None:
+            print("DEBUG: Falló lectura de matriz")
             return
         x = self.read_vector()
         if x is None:
+            print("DEBUG: Falló lectura de vector")
             return
         
         m = len(A)
         n = len(A[0])
         if len(x) != n:
-            messagebox.showerror("Error", "Las dimensiones no coinciden: columnas de A deben igualar filas de x.")
-            return
-        
-        b = self.read_vector()  # Asume que agregas este método similar a read_vector, pero para m elementos
-        if b is None:
-            return
-        if len(b) != n:
-            messagebox.showerror("Error", "b debe tener longitud m (filas de A).")
+            messagebox.showerror("Error", f"Las dimensiones no coinciden: columnas de A ({n}) deben igualar filas de x ({len(x)}).")
             return
         
         # Calcular Ax usando regla fila-vector (producto punto por fila)
@@ -170,30 +175,36 @@ class SubVentanaPrincipal:
                 dot_product += A[i][j] * x[j]
             result.append(dot_product)
         
+        print(f"DEBUG: Resultado calculado: {result}")  # Depuración
         # Mostrar resultado con paso a paso
         self.display_result(A, x, result)
     
-    def display_result(self, A, x, result):  # sourcery skip: low-code-quality
+    def display_result(self, A, x, result):
+        print("DEBUG: Iniciando display_result")  # Depuración
         if self.result_frame:
             self.result_frame.destroy()
 
-        self.result_frame = tk.LabelFrame(self.parent, text="Resultado: Producto Matriz-Vector Ax (Paso a Paso)", padx=10, pady=10)
+        self.result_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
+        ctk.CTkLabel(self.result_frame, text="Resultado: Producto Matriz-Vector Ax (Paso a Paso)", 
+                     text_color=COLOR_TEXT, fg_color="transparent", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", padx=10, pady=5)
         self.result_frame.pack(pady=10, padx=10, fill="both", expand=True)
 
         m = len(A)
         n = len(A[0])
 
-        result_text = tk.Text(self.result_frame, height=20, width=80, wrap=tk.WORD)  # Aumenté el tamaño para más contenido
-        result_text.pack(fill="both", expand=True)
-
-        # Scrollbar para el texto si es necesario
-        scrollbar = tk.Scrollbar(self.result_frame, orient=tk.VERTICAL, command=result_text.yview)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        result_text.config(yscrollcommand=scrollbar.set)
+        # Crear textbox si no existe
+        if self.result_text is None:
+            self.result_text = ctk.CTkTextbox(self.result_frame, height=300, fg_color=COLOR_BG, text_color=COLOR_TEXT,
+                                              corner_radius=10, scrollbar_button_color=COLOR_BUTTON, scrollbar_button_hover_color=COLOR_BUTTON)
+            self.result_text.pack(fill="both", expand=True, padx=10, pady=10)
+        else:
+            # Limpiar si ya existe
+            self.result_text.configure(state="normal")  # Habilitar para editar
+            self.result_text.delete("1.0", "end")
 
         result_str = (
             "=== PRODUCTO MATRIZ-VECTOR Ax (Regla Fila-Vector) ===\n\n"
-            + "Matriz A (m x n):\n"
+            "Matriz A (m x n):\n"
         )
         for i in range(m):
             row_str = "  [ "
@@ -245,13 +256,11 @@ class SubVentanaPrincipal:
         result_str += "Vector resultado Ax:\n"
         result_str += "Ax = [\n"
         for i, val in enumerate(result):
-            result_str += f"  {val:.6f}\n" if i < m - 1 else f"  {val:.6f}\n"
+            result_str += f"  {val:.6f}\n"
         result_str += "]\n"
 
-        #(verificación con b calculado)
-        m = len(A)
-        n = len(A[0])
-        result_str += self.is_linear_combination(A, result) + "\n"  # Llama la función con b = result
+        # Verificación con b = result (Ax siempre consistente)
+        result_str += self.is_linear_combination(A, result) + "\n"
         result_str += "Coeficientes de la combinación: los elementos de x = ["
         for j in range(n):
             result_str += f"{x[j]:.6f}"
@@ -259,8 +268,11 @@ class SubVentanaPrincipal:
                 result_str += ", "
         result_str += "].\n"
 
-        result_text.insert(tk.END, result_str)
-        result_text.config(state=tk.DISABLED)
+        # Insertar y deshabilitar para solo lectura
+        self.result_text.insert("end", result_str)
+        self.result_text.configure(state="disabled")  # Solo lectura, como en Tkinter
+        print("DEBUG: Resultado insertado en textbox")  # Depuración
+    
         
     def is_linear_combination(self, A, b):
         m = len(A)
@@ -317,45 +329,98 @@ class SubVentanaPrincipal:
             self.result_frame.destroy()
         self.matrix_entries = []
         self.vector_entries = []
-        
-        
+        if self.result_text:
+            self.result_text.delete("1.0", "end")
+
+
 class SubVentana1:
-    """Ejemplo de sub-ventana 1 (se abre desde el menú)."""
+    """Sub-ventana 1: Ecuación Vectorial (placeholder adaptado; integra VectorEquationSolver si está adaptado)."""
     def __init__(self, parent):
         self.parent = parent
-        self.parent.configure(bg=COLOR_BG)
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
         
-        label = tk.Label(parent, text="Sub-Ventana 1: Contenido Específico",
-                         fg=COLOR_TEXT, bg=COLOR_BG, font=("Segoe UI", 16))
-        label.pack(pady=20)
+        titulo = ctk.CTkLabel(self.parent, text="Sub-Ventana 1: Ecuación Vectorial",
+                              text_color=COLOR_TEXT, fg_color="transparent",
+                              font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"))
+        titulo.pack(pady=20)
         
-        tk.Button(parent, text="Volver al Menú Principal (usa el menú arriba)", 
-                  bg="#ff6b6b", fg="white", relief="flat").pack(pady=10)
+        # Placeholder para contenido (integra aquí VectorEquationSolver si está adaptado a CTk)
+        # from .vertorequalsolver import VectorEquationSolver
+        # VectorEquationSolver(self.parent)  # Descomenta cuando esté adaptado
         
+        descripcion = ctk.CTkLabel(self.parent, text="Contenido para Ecuación Vectorial (en desarrollo).\nUsa el menú lateral para navegar.",
+                                   text_color=COLOR_SUBTEXT, fg_color="transparent",
+                                   font=ctk.CTkFont(size=12))
+        descripcion.pack(pady=10)
         
+        volver_btn = ctk.CTkButton(self.parent, text="Volver al Menú Principal",
+                                   fg_color="#ff6b6b", text_color="white", corner_radius=5, height=30)
+        volver_btn.pack(pady=10)
+
+
 class SubVentana2:
-    """Ejemplo de sub-ventana 2 (se abre desde el menú)."""
+    """Sub-ventana 2: Propiedades Algebraicas de ℝⁿ (placeholder adaptado; integra VectorAlgebraPropertiesGUI si está adaptado)."""
     def __init__(self, parent):
         self.parent = parent
-        self.parent.configure(bg=COLOR_BG)
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
         
-        label = tk.Label(parent, text="Sub-Ventana 2: Otro Contenido",
-                         fg=COLOR_TEXT, bg=COLOR_BG, font=("Segoe UI", 16))
-        label.pack(pady=20)
+        titulo = ctk.CTkLabel(self.parent, text="Sub-Ventana 2: Propiedades Algebraicas de ℝⁿ",
+                              text_color=COLOR_TEXT, fg_color="transparent",
+                              font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"))
+        titulo.pack(pady=20)
         
-        tk.Entry(parent, width=30, bg="#3a3a4f", fg=COLOR_TEXT).pack(pady=10)
-        tk.Button(parent, text="Ejemplo de Input", bg="#3b82f6", fg="white", relief="flat").pack(pady=5)
+        # Placeholder para contenido (integra aquí VectorAlgebraPropertiesGUI si está adaptado a CTk)
+        # from .propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI
+        # VectorAlgebraPropertiesGUI(self.parent)  # Descomenta cuando esté adaptado
         
+        descripcion = ctk.CTkLabel(self.parent, text="Contenido para Propiedades de ℝⁿ (en desarrollo).\nUsa el menú lateral para navegar.",
+                                   text_color=COLOR_SUBTEXT, fg_color="transparent",
+                                   font=ctk.CTkFont(size=12))
+        descripcion.pack(pady=10)
+        
+        # Ejemplo de input (adaptado)
+        entry_ejemplo = ctk.CTkEntry(self.parent, width=300, height=30, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT,
+                                      placeholder_text="Ejemplo de entrada...")
+        entry_ejemplo.pack(pady=10)
+        
+        btn_ejemplo = ctk.CTkButton(self.parent, text="Ejemplo de Acción",
+                                    fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30)
+        btn_ejemplo.pack(pady=5)
+
+
+class SubVentana3:
+    """Sub-ventana 3: Ecuaciones Homogéneas (placeholder adaptado; integra homogeneo si está adaptado)."""
+    def __init__(self, parent):
+        self.parent = parent
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
+        
+        titulo = ctk.CTkLabel(self.parent, text="Sub-Ventana 3: Ecuaciones Homogéneas",
+                              text_color=COLOR_TEXT, fg_color="transparent",
+                              font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"))
+        titulo.pack(pady=20)
+        
+        # Placeholder para contenido (integra aquí homogeneo.LinearSystemSolver si está adaptado a CTk)
+        # from . import homogeneo
+        # homogeneo.LinearSystemSolver(self.parent)  # Descomenta cuando esté adaptado
+        
+        descripcion = ctk.CTkLabel(self.parent, text="Contenido para Ecuaciones Homogéneas (en desarrollo).\nUsa el menú lateral para navegar.",
+                                   text_color=COLOR_SUBTEXT, fg_color="transparent",
+                                   font=ctk.CTkFont(size=12))
+        descripcion.pack(pady=10)
+        
+        volver_btn = ctk.CTkButton(self.parent, text="Volver al Menú Principal",
+                                   fg_color="#ff6b6b", text_color="white", corner_radius=5, height=30)
+        volver_btn.pack(pady=10)
+
 
 class Vectores:
     def __init__(self, parent, show_subframe_callback):
-        
         self.parent = parent
-        self.parent.configure(bg=COLOR_BG)
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
         self.show_subframe_callback = show_subframe_callback  # Callback para cambiar sub-frames
         
         # Frame contenedor para sub-contenido (donde se cargan las sub-ventanas)
-        self.sub_content_frame = tk.Frame(self.parent, bg=COLOR_BG)
+        self.sub_content_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_BG, corner_radius=0)
         self.sub_content_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Diccionario de sub-frames (se crean lazy, solo cuando se necesitan)
@@ -365,7 +430,7 @@ class Vectores:
         self.show_subframe("principal")
         
     def show_subframe(self, name):
-        """Muestra/oculta sub-frames dentro de OtherScreen."""
+        """Muestra/oculta sub-frames dentro de Vectores."""
         # Ocultar todos los sub-frames
         for sub_frame in self.sub_frames.values():
             sub_frame.pack_forget()
@@ -373,17 +438,20 @@ class Vectores:
         # Crear si no existe
         if name not in self.sub_frames:
             if name == "principal":
-                self.sub_frames[name] = tk.Frame(self.sub_content_frame, bg=COLOR_BG)
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 SubVentanaPrincipal(self.sub_frames[name])
             elif name == "sub1":
-                self.sub_frames[name] = tk.Frame(self.sub_content_frame, bg=COLOR_BG)
-                VectorEquationSolver(self.sub_frames[name])
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                # VectorEquationSolver(self.sub_frames[name])  # Descomenta cuando esté adaptado
+                SubVentana1(self.sub_frames[name])  # Usa placeholder por ahora
             elif name == "sub2":
-                self.sub_frames[name] = tk.Frame(self.sub_content_frame,)
-                VectorAlgebraPropertiesGUI(self.sub_frames[name])
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                # VectorAlgebraPropertiesGUI(self.sub_frames[name])  # Descomenta cuando esté adaptado
+                SubVentana2(self.sub_frames[name])  # Usa placeholder por ahora
             elif name == "sub3":
-                self.sub_frames[name] = tk.Frame(self.sub_content_frame,)
-                homogeneo.LinearSystemSolver(self.sub_frames[name])
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                # homogeneo.LinearSystemSolver(self.sub_frames[name])  # Descomenta cuando esté adaptado
+                SubVentana3(self.sub_frames[name])  # Usa placeholder por ahora
             else:
                 return
         
@@ -392,6 +460,6 @@ class Vectores:
         
         # Llamar callback para actualizar menú en MainApp (opcional, para sincronizar)
         if self.show_subframe_callback:
-            self.show_subframe_callback(name)    
-        
-    
+            self.show_subframe_callback(name)
+
+               
