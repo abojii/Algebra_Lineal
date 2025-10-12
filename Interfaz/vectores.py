@@ -1,8 +1,9 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import re  # Mantenido si se usa en otros módulos
+from Interfaz import propiedadesAlgb_Rn
 from constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY  # Import relativo desde config.py
-from Interfaz import homogeneo  # Asumiendo que está en Interfaz/
+from Interfaz import homogeneo, sistema_ecuaciones  # Asumiendo que está en Interfaz/
 from Interfaz.vertorequalsolver import VectorEquationSolver  # Adáptalo si usa Tkinter
 from Interfaz.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI  # Adáptalo si usa Tkinter
 
@@ -443,15 +444,15 @@ class Vectores:
             elif name == "sub1":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 # VectorEquationSolver(self.sub_frames[name])  # Descomenta cuando esté adaptado
-                SubVentana1(self.sub_frames[name])  # Usa placeholder por ahora
+                VectorEquationSolver(self.sub_frames[name])  # Usa placeholder por ahora
             elif name == "sub2":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 # VectorAlgebraPropertiesGUI(self.sub_frames[name])  # Descomenta cuando esté adaptado
-                SubVentana2(self.sub_frames[name])  # Usa placeholder por ahora
+                propiedadesAlgb_Rn.VectorAlgebraPropertiesGUI(self.sub_frames[name])  # Usa placeholder por ahora
             elif name == "sub3":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 # homogeneo.LinearSystemSolver(self.sub_frames[name])  # Descomenta cuando esté adaptado
-                SubVentana3(self.sub_frames[name])  # Usa placeholder por ahora
+                homogeneo.LinearSystemSolver(self.sub_frames[name])  # Usa placeholder por ahora
             else:
                 return
         

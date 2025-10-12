@@ -1,17 +1,20 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox  # Mantengo para errores (compatible con CTk)
+from Models.solverHomogeneo import solve_linear_system  # Importa la función principal del solver
 
-from Interfaz.solverHomogeneo import solve_linear_system# Importa la función principal del solver
+# Configuración global de tema (agrega esto solo una vez en tu app principal si no lo tienes)
+ctk.set_appearance_mode("dark")  # Tema oscuro
+ctk.set_default_color_theme("blue")  # Colores azules (ajusta si quieres)
 
 class LinearSystemSolver:
-    def __init__(self, root):
-        self.root = root
-        self.root.configure(bg= "#2b2b40")
+    def __init__(self, parent):
+        self.parent = parent
+        self.parent.configure(fg_color="#2b2b40")  # Fondo como en original
         
-        # Variables
-        self.num_rows = tk.IntVar(value=3)
-        self.num_cols = tk.IntVar(value=3)
-        self.is_homogeneous = tk.BooleanVar(value=False)
+        # Variables (tkinter vars funcionan en CTk, pero uso ctk para consistencia)
+        self.num_rows = ctk.IntVar(value=3)
+        self.num_cols = ctk.IntVar(value=3)
+        self.is_homogeneous = ctk.BooleanVar(value=False)
         
         # Entradas
         self.a_entries = None
@@ -20,119 +23,164 @@ class LinearSystemSolver:
         self.setup_ui()
         
     def setup_ui(self):
-        main_frame = ttk.Frame(self.root)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Main frame principal
+        main_frame = ctk.CTkFrame(self.parent, fg_color="transparent")  # Transparente para heredar fondo
+        main_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
+        # Configurar grid en main_frame (como original)
         main_frame.grid_columnconfigure(0, weight=1)
         main_frame.grid_columnconfigure(1, weight=2)
         main_frame.grid_rowconfigure(0, weight=1)
         
-        left_frame = ttk.Frame(main_frame)
+        # Left frame (config + input)
+        left_frame = ctk.CTkFrame(main_frame, fg_color="#2b2b40", corner_radius=10)
         left_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
         
-        config_frame = ttk.LabelFrame(left_frame, text="Configuración del Sistema", padding=10)
-        config_frame.pack(fill=tk.X, pady=(0, 10))
+        # Config frame (simula LabelFrame con borde)
+        config_frame = ctk.CTkFrame(left_frame, fg_color="#2b2b40", corner_radius=10,
+                                    border_width=2, border_color="#555555")  # FIX: Borde visible
+        config_frame.pack(fill="x", padx=10, pady=10)
         
-        size_frame = ttk.Frame(config_frame)
-        size_frame.pack(fill=tk.X, pady=5)
+        # Título para config (simula LabelFrame)
+        config_title = ctk.CTkLabel(config_frame, text="Configuración del Sistema", font=ctk.CTkFont(size=14, weight="bold"))
+        config_title.pack(pady=(10, 5))
         
-        ttk.Label(size_frame, text="Número de ecuaciones (filas):").grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
-        row_spin = ttk.Spinbox(size_frame, from_=1, to=10, textvariable=self.num_rows, width=10)
-        row_spin.grid(row=0, column=1, padx=5)
-        row_spin.bind('<Return>', self.update_matrix_size)
-        row_spin.bind('<<Any-Change>>', self.update_matrix_size)
+        size_frame = ctk.CTkFrame(config_frame, fg_color="transparent")
+        size_frame.pack(fill="x", pady=5)
         
-        ttk.Label(size_frame, text="Número de variables (columnas A):").grid(row=0, column=2, sticky=tk.W, padx=(20, 5))
-        col_spin = ttk.Spinbox(size_frame, from_=1, to=10, textvariable=self.num_cols, width=10)
-        col_spin.grid(row=0, column=3, padx=5)
-        col_spin.bind('<Return>', self.update_matrix_size)
-        col_spin.bind('<<Any-Change>>', self.update_matrix_size)
+        # Spinbox simulado con CTkEntry para rows
+        ctk.CTkLabel(size_frame, text="Número de ecuaciones (filas):", font=ctk.CTkFont(size=12)).grid(row=0, column=0, sticky="w", padx=(0, 5), pady=5)
+        self.row_entry = ctk.CTkEntry(size_frame, textvariable=self.num_rows, width=80, fg_color="white", text_color="black")
+        self.row_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.row_entry.bind('<KeyRelease>', self.update_matrix_size)  # Simula cambio dinámico
+        # Validación: Solo números 1-10
+        self.row_entry.bind('<KeyRelease>', self.validate_spin_entry)
         
-        homo_frame = ttk.Frame(config_frame)
-        homo_frame.pack(fill=tk.X, pady=5)
-        ttk.Checkbutton(homo_frame, text="Sistema Homogéneo (b = 0)", variable=self.is_homogeneous,
-                        command=self.toggle_homogeneous).pack(anchor=tk.W)
+        # Spinbox simulado para cols
+        ctk.CTkLabel(size_frame, text="Número de variables (columnas A):", font=ctk.CTkFont(size=12)).grid(row=0, column=2, sticky="w", padx=(20, 5), pady=5)
+        self.col_entry = ctk.CTkEntry(size_frame, textvariable=self.num_cols, width=80, fg_color="white", text_color="black")
+        self.col_entry.grid(row=0, column=3, padx=5, pady=5)
+        self.col_entry.bind('<KeyRelease>', self.update_matrix_size)
+        self.col_entry.bind('<KeyRelease>', self.validate_spin_entry)
         
-        button_frame = ttk.Frame(config_frame)
-        button_frame.pack(fill=tk.X, pady=5)
+        # Homogeneous checkbox
+        homo_frame = ctk.CTkFrame(config_frame, fg_color="transparent")
+        homo_frame.pack(fill="x", pady=5)
+        self.homo_checkbox = ctk.CTkCheckBox(homo_frame, text="Sistema Homogéneo (b = 0)", variable=self.is_homogeneous,
+                                            command=self.toggle_homogeneous, checkbox_width=20, checkbox_height=20)
+        self.homo_checkbox.pack(anchor="w", pady=5)
         
-        init_btn = ttk.Button(button_frame, text="Inicializar Matrices", command=self.initialize_matrix)
-        init_btn.pack(side=tk.LEFT, padx=(0, 10))
+        # Buttons frame
+        button_frame = ctk.CTkFrame(config_frame, fg_color="transparent")
+        button_frame.pack(fill="x", pady=5)
         
-        clear_btn = ttk.Button(button_frame, text="Limpiar Solución", command=lambda: self.solution_text.delete(1.0, tk.END))
-        clear_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self.init_btn = ctk.CTkButton(button_frame, text="Inicializar Matrices", command=self.initialize_matrix,
+                                    fg_color="blue", text_color="white", corner_radius=8, height=30)
+        self.init_btn.pack(side="left", padx=(0, 10), pady=5)
         
-        resolve_btn = ttk.Button(button_frame, text="Resolver Sistema", command=self.solve_system)
-        resolve_btn.pack(side=tk.LEFT)
+        clear_btn = ctk.CTkButton(button_frame, text="Limpiar Solución", command=self.clear_solution,
+                                fg_color="gray", text_color="white", corner_radius=8, height=30)
+        clear_btn.pack(side="left", padx=(0, 10), pady=5)
         
-        input_frame = ttk.LabelFrame(left_frame, text="Entrada de Matriz y Vector", padding=10)
-        input_frame.pack(fill=tk.BOTH, expand=True)
+        self.resolve_btn = ctk.CTkButton(button_frame, text="Resolver Sistema", command=self.solve_system,
+                                        fg_color="green", text_color="white", corner_radius=8, height=30)
+        self.resolve_btn.pack(side="left", pady=5)
         
-        a_frame = ttk.LabelFrame(input_frame, text="Matriz de Coeficientes A (filas x columnas)", padding=5)
-        a_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5), side=tk.LEFT)
+        # Input frame (simula LabelFrame con borde)
+        input_frame = ctk.CTkFrame(left_frame, fg_color="#2b2b40", corner_radius=10,
+                                border_width=2, border_color="#555555")  # FIX: Borde visible
+        input_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
-        self.a_canvas = tk.Canvas(a_frame, bg='white', width=400, height=400)
-        self.a_scrollbar_v = ttk.Scrollbar(a_frame, orient=tk.VERTICAL, command=self.a_canvas.yview)
-        self.a_scrollbar_h = ttk.Scrollbar(a_frame, orient=tk.HORIZONTAL, command=self.a_canvas.xview)
-        self.a_scrollable_frame = ttk.Frame(self.a_canvas)
+        input_title = ctk.CTkLabel(input_frame, text="Entrada de Matriz y Vector", font=ctk.CTkFont(size=14, weight="bold"))
+        input_title.pack(pady=(10, 5))
         
-        self.a_scrollable_frame.bind("<Configure>", lambda e: self.a_canvas.configure(scrollregion=self.a_canvas.bbox("all")))
-        self.a_canvas.create_window((0, 0), window=self.a_scrollable_frame, anchor="nw")
-        self.a_canvas.configure(yscrollcommand=self.a_scrollbar_v.set, xscrollcommand=self.a_scrollbar_h.set)
+        # A frame (matriz con borde)
+        a_frame = ctk.CTkFrame(input_frame, fg_color="#2b2b40", corner_radius=10,
+                            border_width=2, border_color="#555555")  # FIX: Borde visible
+        a_frame.pack(fill="both", expand=True, padx=(10, 5), side="left", pady=5)
         
-        self.a_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.a_scrollbar_v.pack(side=tk.RIGHT, fill=tk.Y)
-        self.a_scrollbar_h.pack(side=tk.BOTTOM, fill=tk.X)
+        a_title = ctk.CTkLabel(a_frame, text="Matriz de Coeficientes A (filas x columnas)", font=ctk.CTkFont(size=12, weight="bold"))
+        a_title.pack(pady=(10, 5))
         
-        b_frame = ttk.LabelFrame(input_frame, text="Vector de Términos Independientes b (filas x 1)", padding=5)
-        b_frame.pack(fill=tk.Y, padx=(5, 0), side=tk.RIGHT)
+        # Scrollable para A
+        self.a_scrollable = ctk.CTkScrollableFrame(a_frame, fg_color="#2b2b40", scrollbar_button_color="gray")
+        self.a_scrollable.pack(fill="both", expand=True, padx=10, pady=10)
         
-        self.b_canvas = tk.Canvas(b_frame, bg='white', width=150, height=400)
-        self.b_scrollbar_v = ttk.Scrollbar(b_frame, orient=tk.VERTICAL, command=self.b_canvas.yview)
-        self.b_scrollable_frame = ttk.Frame(self.b_canvas)
+        # B frame (vector con borde)
+        b_frame = ctk.CTkFrame(input_frame, fg_color="#2b2b40", corner_radius=10,
+                            border_width=2, border_color="#555555")  # FIX: Borde visible
+        b_frame.pack(fill="y", padx=(5, 10), side="right", pady=5)
         
-        self.b_scrollable_frame.bind("<Configure>", lambda e: self.b_canvas.configure(scrollregion=self.b_canvas.bbox("all")))
-        self.b_canvas.create_window((0, 0), window=self.b_scrollable_frame, anchor="nw")
-        self.b_canvas.configure(yscrollcommand=self.b_scrollbar_v.set)
+        b_title = ctk.CTkLabel(b_frame, text="Vector de Términos Independientes b (filas x 1)", font=ctk.CTkFont(size=12, weight="bold"))
+        b_title.pack(pady=(10, 5))
         
-        self.b_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.b_scrollbar_v.pack(side=tk.RIGHT, fill=tk.Y)
+        # Scrollable para b
+        self.b_scrollable = ctk.CTkScrollableFrame(b_frame, fg_color="#2b2b40", scrollbar_button_color="gray")
+        self.b_scrollable.pack(fill="both", expand=True, padx=10, pady=10)
         
-        right_frame = ttk.Frame(main_frame)
+        # Right frame (solución)
+        right_frame = ctk.CTkFrame(main_frame, fg_color="#2b2b40", corner_radius=10)
         right_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
         right_frame.grid_rowconfigure(0, weight=1)
         right_frame.grid_columnconfigure(0, weight=1)
         
-        solution_label_frame = ttk.LabelFrame(right_frame, text="Solución del Sistema", padding=10)
-        solution_label_frame.pack(fill=tk.BOTH, expand=True)
-        solution_label_frame.grid_rowconfigure(0, weight=1)
-        solution_label_frame.grid_columnconfigure(0, weight=1)
+        # Solution frame (simula LabelFrame con borde)
+        solution_frame = ctk.CTkFrame(right_frame, fg_color="#2b2b40", corner_radius=10,
+                                    border_width=2, border_color="#555555")  # FIX: Borde visible
+        solution_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
-        self.solution_text = tk.Text(solution_label_frame, wrap=tk.WORD, height=40, width=100, font=('Courier', 10))
-        self.solution_text.grid(row=0, column=0, sticky="nsew")
+        # FIX: Configurar grid en solution_frame antes de agregar widgets
+        solution_frame.grid_rowconfigure(0, weight=0)  # Fila 0 para título (fija)
+        solution_frame.grid_rowconfigure(1, weight=1)  # Fila 1 para textbox (expande)
+        solution_frame.grid_columnconfigure(0, weight=1)  # Columna 0 expande
         
-        v_scrollbar = ttk.Scrollbar(solution_label_frame, orient=tk.VERTICAL, command=self.solution_text.yview)
-        v_scrollbar.grid(row=0, column=1, sticky="ns")
-        self.solution_text.config(yscrollcommand=v_scrollbar.set)
+        solution_title = ctk.CTkLabel(solution_frame, text="Solución del Sistema", font=ctk.CTkFont(size=14, weight="bold"))
+        solution_title.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))  # FIX: Cambiado a grid (no pack)
         
-        h_scrollbar = ttk.Scrollbar(solution_label_frame, orient=tk.HORIZONTAL, command=self.solution_text.xview)
-        h_scrollbar.grid(row=1, column=0, sticky="ew")
-        self.solution_text.config(xscrollcommand=h_scrollbar.set)
+        # Textbox para solución (con scroll integrado)
+        self.solution_text = ctk.CTkTextbox(solution_frame, wrap="word", font=ctk.CTkFont(family="Courier", size=10),
+                                            fg_color="white", text_color="black", height=400)
+        self.solution_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)  # Mantiene grid
         
-        self.initialize_matrix()
+        self.initialize_matrix()  # Inicializar al final
+
+    def validate_spin_entry(self, event=None):
+        """Valida entradas de spinbox: solo números enteros 1-10."""
+        entry = event.widget
+        value = entry.get().strip()
+        if value.isdigit():
+            val = int(value)
+            if val < 1:
+                entry.delete(0, "end")
+                entry.insert(0, "1")
+            elif val > 10:
+                entry.delete(0, "end")
+                entry.insert(0, "10")
+        else:
+            # Remover no-dígitos (mantener solo el último dígito válido)
+            digits = ''.join(filter(str.isdigit, value))
+            entry.delete(0, "end")
+            if digits:
+                val = int(digits)
+                if 1 <= val <= 10:
+                    entry.insert(0, str(val))
+                else:
+                    entry.insert(0, "1" if val < 1 else "10")
+            else:
+                entry.insert(0, "1")
     
     def update_matrix_size(self, event=None):
-        # Placeholder: No hace nada hasta inicializar
-        pass
+        # Actualiza al cambiar tamaño (llama a initialize si se presiona Enter o cambia)
+        if event and event.keysym == "Return":
+            self.initialize_matrix()
+        # Para cambios dinámicos, opcional: debounce si quieres, pero por ahora solo inicializa en botón
     
     def initialize_matrix(self):
         rows = self.num_rows.get()
         cols = self.num_cols.get()
         
-        # Limpiar frames
-        for widget in self.a_scrollable_frame.winfo_children():
-            widget.destroy()
-        for widget in self.b_scrollable_frame.winfo_children():
+        # Limpiar A
+        for widget in self.a_scrollable.winfo_children():
             widget.destroy()
         
         # Crear entradas para A
@@ -140,55 +188,67 @@ class LinearSystemSolver:
         for i in range(rows):
             row_entries = []
             for j in range(cols):
-                entry = ttk.Entry(self.a_scrollable_frame, width=8, font=('Courier', 10))
-                entry.grid(row=i, column=j, padx=2, pady=2)
+                entry = ctk.CTkEntry(self.a_scrollable, width=60, height=25, fg_color="white", text_color="black",
+                                     font=ctk.CTkFont(family="Courier", size=10))
+                entry.grid(row=i, column=j, padx=2, pady=2, sticky="ew")
                 entry.insert(0, "0")
                 row_entries.append(entry)
             self.a_entries.append(row_entries)
         
-        self.a_canvas.configure(scrollregion=self.a_canvas.bbox("all"))
-        self.a_canvas.update_idletasks()
+        # Configurar columnas para expansión uniforme
+        for j in range(cols):
+            self.a_scrollable.grid_columnconfigure(j, weight=1)
+        
+        # Limpiar B
+        for widget in self.b_scrollable.winfo_children():
+            widget.destroy()
         
         # Crear entradas para b
         self.b_entries = []
         if not self.is_homogeneous.get():
             for i in range(rows):
-                entry = ttk.Entry(self.b_scrollable_frame, width=8, font=('Courier', 10))
-                entry.grid(row=i, column=0, padx=2, pady=2)
+                entry = ctk.CTkEntry(self.b_scrollable, width=60, height=25, fg_color="white", text_color="black",
+                                     font=ctk.CTkFont(family="Courier", size=10))
+                entry.grid(row=i, column=0, padx=2, pady=2, sticky="ew")
                 entry.insert(0, "0")
                 self.b_entries.append(entry)
         else:
             for i in range(rows):
-                label = ttk.Label(self.b_scrollable_frame, text="0", font=('Courier', 10), relief=tk.SUNKEN, width=8)
-                label.grid(row=i, column=0, padx=2, pady=2)
+                label = ctk.CTkLabel(self.b_scrollable, text="0", font=ctk.CTkFont(family="Courier", size=10),
+                                     fg_color="gray", text_color="white", width=60, height=25, anchor="center")
+                label.grid(row=i, column=0, padx=2, pady=2, sticky="ew")
                 self.b_entries.append(None)
         
-        self.b_canvas.configure(scrollregion=self.b_canvas.bbox("all"))
-        self.b_canvas.update_idletasks()
+        self.b_scrollable.grid_columnconfigure(0, weight=1)
         
-        self.solution_text.delete(1.0, tk.END)
+        self.clear_solution()
     
     def toggle_homogeneous(self):
         rows = self.num_rows.get()
         
-        for widget in self.b_scrollable_frame.winfo_children():
+        # Limpiar B
+        for widget in self.b_scrollable.winfo_children():
             widget.destroy()
         
         self.b_entries = []
         if self.is_homogeneous.get():
             for i in range(rows):
-                label = ttk.Label(self.b_scrollable_frame, text="0", font=('Courier', 10), relief=tk.SUNKEN, width=8)
-                label.grid(row=i, column=0, padx=2, pady=2)
+                label = ctk.CTkLabel(self.b_scrollable, text="0", font=ctk.CTkFont(family="Courier", size=10),
+                                     fg_color="gray", text_color="white", width=60, height=25, anchor="center")
+                label.grid(row=i, column=0, padx=2, pady=2, sticky="ew")
                 self.b_entries.append(None)
         else:
             for i in range(rows):
-                entry = ttk.Entry(self.b_scrollable_frame, width=8, font=('Courier', 10))
-                entry.grid(row=i, column=0, padx=2, pady=2)
+                entry = ctk.CTkEntry(self.b_scrollable, width=60, height=25, fg_color="white", text_color="black",
+                                     font=ctk.CTkFont(family="Courier", size=10))
+                entry.grid(row=i, column=0, padx=2, pady=2, sticky="ew")
                 entry.insert(0, "0")
                 self.b_entries.append(entry)
         
-        self.b_canvas.configure(scrollregion=self.b_canvas.bbox("all"))
-        self.b_canvas.update_idletasks()
+        self.b_scrollable.grid_columnconfigure(0, weight=1)
+    
+    def clear_solution(self):
+        self.solution_text.delete("1.0", "end")
     
     def solve_system(self):
         """AQUÍ ESTÁ LA LLAMADA PRINCIPAL AL SOLVER"""
@@ -230,11 +290,11 @@ class LinearSystemSolver:
             result = solve_linear_system(A, b, homogeneous=homogeneous)
             
             # Limpiar y mostrar resultados formateados
-            self.solution_text.delete(1.0, tk.END)
+            self.clear_solution()
             
             if result['error']:
-                self.solution_text.insert(tk.END, f"Error: {result['error']}\n\n")
-                self.solution_text.insert(tk.END, "\n".join(result['steps']))
+                self.solution_text.insert("end", f"Error: {result['error']}\n\n")
+                self.solution_text.insert("end", "\n".join(result['steps']))
                 return
             
             # Formatear salida
@@ -250,14 +310,16 @@ class LinearSystemSolver:
             output += f"Solución particular: {result['particular_solution']}\n\n"
             output += f"Solución general: {result['solution_general']}\n"
             
-            self.solution_text.insert(tk.END, output)
+            self.solution_text.insert("end", output)
             
         except ValueError as e:
             messagebox.showerror("Error de Entrada", f"Error en los valores: {str(e)}")
         except Exception as e:
             messagebox.showerror("Error", f"Error al resolver: {str(e)}")
 
+
 if __name__ == "__main__":
-    root = tk.Tk()
+    # Para testing standalone: Crea una ventana CTk
+    root = ctk.CTk()
     app = LinearSystemSolver(root)
     root.mainloop()

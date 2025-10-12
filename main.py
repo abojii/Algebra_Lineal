@@ -56,6 +56,10 @@ class MainApp(ctk.CTk):
         # Diccionario para botones del sub-menú (para resaltar el activo)
         self.sub_menu_buttons = {}
 
+        # CAMBIO: Flags para manejar overlay y colapso
+        self.sub_menu_active = False
+        self.sub_menu_visible = True  # Inicialmente visible cuando se activa
+
     def create_menu_buttons(self):
         """Crea los botones principales del menú lateral."""
         for widget in self.buttons_frame.winfo_children():
@@ -84,56 +88,125 @@ class MainApp(ctk.CTk):
 
     def show_frame(self, name):
         """Muestra el frame correspondiente y configura el sub-menú si aplica."""
-        # Ocultar todos los frames
+        # FIX: Ocultar todos los frames directamente (sin verificaciones, es seguro en Tkinter)
         for f in self.frames.values():
             f.pack_forget()
+            f.grid_forget()
 
         if frame := self.frames.get(name):
+            # CAMBIO: Siempre usa pack para el contenido (ocupa todo el espacio)
             frame.pack(fill="both", expand=True)
 
-            # Configurar menú dinámicamente
             if name == "otra":
-                self.setup_sub_menu()  # Crea/actualiza sub-menú para vectores
+                # Activar modo submenú overlay
+                self.setup_sub_menu()  # Crea/actualiza sub-menú como overlay
+                self.sub_menu_active = True
+                # Si estaba colapsado, mostrarlo de nuevo (opcional)
+                if hasattr(self, 'sub_menu_frame') and not self.sub_menu_visible:
+                    self.toggle_sub_menu()  # Expande si estaba colapsado
             else:
-                self.clear_menu()  # Limpia sub-menú para otras secciones (ej: calc)
+                self.clear_menu()  # Limpia sub-menú
+                self.sub_menu_active = False
 
     def setup_sub_menu(self):
-        """Crea el sub-menú para la sección de Vectores (botones en un frame)."""
-        if hasattr(self, 'sub_menu_frame'):
-            return  # Ya existe, no recrear
+        """Crea el sub-menú para la sección de Vectores como overlay en superior izquierda."""
+        if hasattr(self, 'sub_menu_frame') and self.sub_menu_frame.winfo_exists():
+            # Si ya existe, solo posicionarlo si no está visible
+            if not self.sub_menu_visible:
+                self.sub_menu_frame.place(x=10, y=10)
+                self.sub_menu_visible = True
+            return
 
-        # Frame para sub-botones (reemplaza o agrega al buttons_frame si es necesario)
-        self.sub_menu_frame = ctk.CTkFrame(self.menu_frame, fg_color=COLOR_FRAME, corner_radius=0)
-        self.sub_menu_frame.pack(fill="both", expand=True, pady=10)
+        # CAMBIO: Crear frame para sub-botones como overlay (place en content_frame)
+        # Ancho fijo, altura dinámica
+        num_opciones = 5  # 4 opciones + 1 salir/colapsar
+        height = num_opciones * 35 + 40  # Aprox: 30px botón + padding + título
 
-        # Limpiar buttons_frame temporalmente si es necesario (opcional: integra en lugar de reemplazar)
-        for widget in self.buttons_frame.winfo_children():
-            widget.pack_forget()  # Oculta botones principales mientras sub-menú está activo
+        self.sub_menu_frame = ctk.CTkFrame(
+            self.content_frame,
+            width=250,
+            height=height,
+            fg_color=COLOR_FRAME,
+            corner_radius=10,
+            border_width=2,  # CAMBIO: Borde para simular elevación/sombra
+            border_color="#333333"  # Color oscuro para sombra sutil
+        )
+        # Posicionar como overlay en superior izquierda (no afecta pack del contenido)
+        self.sub_menu_frame.place(x=10, y=10)
 
-        # Crear botones del sub-menú y almacenarlos para resaltar
+        # Título del submenú con botón colapsar
+        title_frame = ctk.CTkFrame(self.sub_menu_frame, fg_color="transparent")
+        title_frame.pack(fill="x", padx=10, pady=(10, 5))
+
+        sub_title = ctk.CTkLabel(
+            title_frame,
+            text="Submenú Vectores",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color="white"
+        )
+        sub_title.pack(side="left")
+
+        # CAMBIO: Botón para colapsar (oculta submenú temporalmente)
+        collapse_btn = ctk.CTkButton(
+            title_frame,
+            text="X",
+            width=20, height=20,
+            fg_color="red",
+            text_color="white",
+            corner_radius=10,
+            command=self.toggle_sub_menu,
+            hover_color="darkred"
+        )
+        collapse_btn.pack(side="right", padx=(5, 0))
+
+        # Crear botones del sub-menú
         self.sub_menu_buttons = {}
         opciones = [
             ("Matriz-Vector (Ax)", "principal"),
-            ("Ecuacion Vectorial", "sub1"),  # Corregí "Ecucaion" a "Ecuacion"
+            ("Ecuación Vectorial", "sub1"),
             ("Propiedades algebraicas de ℝⁿ", "sub2"),
-            ("Ecuaciones Homogeneas", "sub3")  # Corregí "Homogenias" a "Homogeneas"
+            ("Ecuaciones Homogéneas", "sub3")
         ]
 
         for text, sub_name in opciones:
-            btn = ctk.CTkButton(self.sub_menu_frame, text=text, fg_color=COLOR_BUTTON, text_color="white",
-                                corner_radius=5, height=30,
-                                command=lambda n=sub_name: self.change_subframe(n))
-            btn.pack(fill="x", pady=2, padx=5)
+            btn = ctk.CTkButton(
+                self.sub_menu_frame,
+                text=text,
+                fg_color=COLOR_BUTTON,
+                text_color="white",
+                corner_radius=5,
+                height=30,
+                command=lambda n=sub_name: self.change_subframe(n)
+            )
+            btn.pack(fill="x", pady=2, padx=10)
             self.sub_menu_buttons[sub_name] = btn
 
-        # Botón para salir del sub-menú (vuelve a mostrar botones principales)
-        salir_btn = ctk.CTkButton(self.sub_menu_frame, text="Salir de Sub-Menú", fg_color="red", text_color="white",
-                                  corner_radius=5, height=30,
-                                  command=self.clear_menu)
-        salir_btn.pack(fill="x", pady=5, padx=5)
+        # Botón para salir del sub-menú (destruye completamente)
+        salir_btn = ctk.CTkButton(
+            self.sub_menu_frame,
+            text="Salir de Sub-Menú",
+            fg_color="red",
+            text_color="white",
+            corner_radius=5,
+            height=30,
+            command=self.clear_menu
+        )
+        salir_btn.pack(fill="x", pady=(5, 10), padx=10)
 
         # Marcar la opción actual
         self.update_sub_menu(self.current_subframe)
+
+        self.sub_menu_visible = True
+
+    def toggle_sub_menu(self):
+        """CAMBIO: Alterna visibilidad del submenú (colapsa/expande sin destruir)."""
+        if self.sub_menu_visible:
+            self.sub_menu_frame.place_forget()
+            self.sub_menu_visible = False
+            # Opcional: Cambiar texto del botón a "+" o algo, pero por simplicidad usamos "X" siempre
+        else:
+            self.sub_menu_frame.place(x=10, y=10)
+            self.sub_menu_visible = True
 
     def change_subframe(self, sub_name):
         """Cambia a una sub-ventana en la sección de Vectores."""
@@ -154,25 +227,22 @@ class MainApp(ctk.CTk):
         for btn in self.sub_menu_buttons.values():
             btn.configure(fg_color=COLOR_BUTTON)
 
-        # Resaltar el botón activo con un color más claro (ej: azul más claro)
+        # Resaltar el botón activo con un color más claro
         if active_name in self.sub_menu_buttons:
             self.sub_menu_buttons[active_name].configure(fg_color="#60a5fa")  # Azul claro para resaltar
 
     def clear_menu(self):
-        """Limpia el sub-menú y restaura el menú principal cuando sales de Vectores."""
-        if hasattr(self, 'sub_menu_frame'):
+        """Limpia el sub-menú completamente cuando sales de Vectores."""
+        if hasattr(self, 'sub_menu_frame') and self.sub_menu_frame.winfo_exists():
             self.sub_menu_frame.destroy()
             del self.sub_menu_frame
             self.sub_menu_buttons = {}
-
-        # Restaurar botones principales del menú
-        for widget in self.buttons_frame.winfo_children():
-            widget.pack(fill="x", pady=5, padx=5)  # Re-mostrar si fueron ocultados
-
+        
         self.current_subframe = "principal"
+        self.sub_menu_active = False
+        self.sub_menu_visible = True  # Reset para próxima vez
 
 
 if __name__ == "__main__":
-    # Importa config.py implícitamente (se ejecuta al importar MainApp)
     app = MainApp()
     app.mainloop()
