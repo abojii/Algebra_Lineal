@@ -159,23 +159,42 @@ class MatrixCalculator(ctk.CTkFrame):  # 👈 ahora hereda de CTkFrame
                     return
 
             if op == "Suma":
-                result = [[A[i][j] + B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+                import sys
+                import os
+                sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Models'))
+                from solverHomogeneo import add_matrices
+                result, pasos = add_matrices(A, B, explain=True)
+                self.show_result_with_steps(result, pasos)
             elif op == "Resta":
-                result = [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+                import sys
+                import os
+                sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Models'))
+                from solverHomogeneo import sub_matrices
+                result, pasos = sub_matrices(A, B, explain=True)
+                self.show_result_with_steps(result, pasos)
             elif op == "Multiplicación por Escalar":
                 result = [[k * A[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+                self.show_result(result)
             elif op == "Multiplicación (A x B)":
                 result = [[sum(A[i][k] * B[k][j] for k in range(len(B))) for j in range(len(B[0]))] for i in range(len(A))]
+                self.show_result(result)
             else:
                 result = []
 
-            self.show_result(result)
+            # self.show_result(result)
 
         except ValueError:
             messagebox.showerror("Error", "Verifica que todos los valores sean numéricos.")
 
     def show_result(self, matrix):
         self.result_box.delete("1.0", "end")
+        for row in matrix:
+            self.result_box.insert("end", "   ".join(f"{val:.2f}" for val in row) + "\n")
+
+    def show_result_with_steps(self, matrix, pasos):
+        self.result_box.delete("1.0", "end")
+        self.result_box.insert("end", pasos + "\n")
+        self.result_box.insert("end", "Resultado:\n")
         for row in matrix:
             self.result_box.insert("end", "   ".join(f"{val:.2f}" for val in row) + "\n")
 
