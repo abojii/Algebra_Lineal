@@ -1,5 +1,9 @@
 import customtkinter as ctk
+import sys
+import os
 from tkinter import messagebox
+from Models.solverHomogeneo import add_matrices
+from Models.solverHomogeneo import sub_matrices
 
 # Colores personalizados
 COLOR_BG = "#1e1e2f"
@@ -158,13 +162,14 @@ class MatrixCalculator(ctk.CTkFrame):  # ahora hereda de CTkFrame
                     messagebox.showerror("Error", "El número de columnas de A debe ser igual al número de filas de B.")
                     return
 
-            steps = ""  # Cadena para almacenar los pasos
             if op == "Suma":
-                result = [[A[i][j] + B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+                result, pasos = add_matrices(A, B, explain=True)  # Asume que devuelve (result, pasos)
+                self.show_result(pasos, result)  # Usa show_result con pasos primero
             elif op == "Resta":
-                result = [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+                result, pasos = sub_matrices(A, B, explain=True)  # Asume que devuelve (result, pasos)
+                self.show_result(pasos, result)  # Usa show_result con pasos primero
             elif op == "Multiplicación por Escalar":
-                steps += f"--- Multiplicación por escalar (k = {k}) paso a paso ---\n"
+                steps = f"--- Multiplicación por escalar (k = {k}) paso a paso ---\n"
                 result = []
                 for i in range(len(A)):
                     row_result = []
@@ -174,8 +179,9 @@ class MatrixCalculator(ctk.CTkFrame):  # ahora hereda de CTkFrame
                         steps += f"  Paso para A[{i}][{j}]: {k} * {A[i][j]} = {element_result:.2f}\n"
                     result.append(row_result)
                 steps += "\n"
+                self.show_result(steps, result)  # Usa show_result
             elif op == "Multiplicación (A x B)":
-                steps += "--- Multiplicación de matrices (A x B) paso a paso ---\n"
+                steps = "--- Multiplicación de matrices (A x B) paso a paso ---\n"
                 m = len(A)  # Filas de A
                 n = len(A[0])  # Columnas de A (y filas de B)
                 p = len(B[0])  # Columnas de B
@@ -192,18 +198,28 @@ class MatrixCalculator(ctk.CTkFrame):  # ahora hereda de CTkFrame
                         result[i][j] = suma  # Asignamos el resultado final
                         steps += f"  Resultado final para C[{i}][{j}]: {suma:.2f}\n\n"
                 steps += "\n"
+                self.show_result(steps, result)  # Usa show_result
             else:
                 result = []
-            # Mostramos los pasos y el resultado
-            self.show_result(steps, result)  # Pasamos tanto los pasos como el resultado
+                steps = ""
+                self.show_result(steps, result)
+
         except ValueError:
             messagebox.showerror("Error", "Verifica que todos los valores sean numéricos.")
+
 
     def show_result(self, steps, matrix):
         self.result_box.delete("1.0", "end")  # Limpiamos el cuadro
         if steps:  # Si hay pasos, los mostramos primero
             self.result_box.insert("end", steps + "\n")
         self.result_box.insert("end", "Matriz resultado:\n")
+        for row in matrix:
+            self.result_box.insert("end", "   ".join(f"{val:.2f}" for val in row) + "\n")
+    
+    def show_result_with_steps(self, matrix, pasos):
+        self.result_box.delete("1.0", "end")
+        self.result_box.insert("end", pasos + "\n")
+        self.result_box.insert("end", "Resultado:\n")
         for row in matrix:
             self.result_box.insert("end", "   ".join(f"{val:.2f}" for val in row) + "\n")
 
