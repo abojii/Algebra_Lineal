@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 
-# 🎨 Colores personalizados
+# Colores personalizados
 COLOR_BG = "#1e1e2f"
 COLOR_FRAME = "#2b2b40"
 COLOR_TEXT = "#ffffff"
@@ -12,7 +12,7 @@ COLOR_ENTRY = "#3a3a4f"
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-class MatrixCalculator(ctk.CTkFrame):  # 👈 ahora hereda de CTkFrame
+class MatrixCalculator(ctk.CTkFrame):  # ahora hereda de CTkFrame
     def __init__(self, parent):
         super().__init__(parent, fg_color=COLOR_BG)
         self.parent = parent
@@ -158,26 +158,55 @@ class MatrixCalculator(ctk.CTkFrame):  # 👈 ahora hereda de CTkFrame
                     messagebox.showerror("Error", "El número de columnas de A debe ser igual al número de filas de B.")
                     return
 
+            steps = ""  # Cadena para almacenar los pasos
             if op == "Suma":
                 result = [[A[i][j] + B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
             elif op == "Resta":
                 result = [[A[i][j] - B[i][j] for j in range(len(A[0]))] for i in range(len(A))]
             elif op == "Multiplicación por Escalar":
-                result = [[k * A[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+                steps += f"--- Multiplicación por escalar (k = {k}) paso a paso ---\n"
+                result = []
+                for i in range(len(A)):
+                    row_result = []
+                    for j in range(len(A[0])):
+                        element_result = k * A[i][j]
+                        row_result.append(element_result)
+                        steps += f"  Paso para A[{i}][{j}]: {k} * {A[i][j]} = {element_result:.2f}\n"
+                    result.append(row_result)
+                steps += "\n"
             elif op == "Multiplicación (A x B)":
-                result = [[sum(A[i][k] * B[k][j] for k in range(len(B))) for j in range(len(B[0]))] for i in range(len(A))]
+                steps += "--- Multiplicación de matrices (A x B) paso a paso ---\n"
+                m = len(A)  # Filas de A
+                n = len(A[0])  # Columnas de A (y filas de B)
+                p = len(B[0])  # Columnas de B
+                result = [[0 for _ in range(p)] for _ in range(m)]  # Matriz resultado
+                for i in range(m):  # Para cada fila de A
+                    for j in range(p):  # Para cada columna de B
+                        steps += f"Calculando C[{i}][{j}] = Σ (A[{i}][k] * B[k][{j}]) para k de 0 a {n-1}\n"
+                        suma = 0
+                        for k in range(n):
+                            termino = A[i][k] * B[k][j]
+                            suma += termino
+                            steps += f"  Paso {k+1}: A[{i}][{k}] * B[{k}][{j}] = {A[i][k]} * {B[k][j]} = {termino:.2f}\n"
+                            steps += f"  Suma acumulada: {suma:.2f}\n"
+                        result[i][j] = suma  # Asignamos el resultado final
+                        steps += f"  Resultado final para C[{i}][{j}]: {suma:.2f}\n\n"
+                steps += "\n"
             else:
                 result = []
-
-            self.show_result(result)
-
+            # Mostramos los pasos y el resultado
+            self.show_result(steps, result)  # Pasamos tanto los pasos como el resultado
         except ValueError:
             messagebox.showerror("Error", "Verifica que todos los valores sean numéricos.")
 
-    def show_result(self, matrix):
-        self.result_box.delete("1.0", "end")
+    def show_result(self, steps, matrix):
+        self.result_box.delete("1.0", "end")  # Limpiamos el cuadro
+        if steps:  # Si hay pasos, los mostramos primero
+            self.result_box.insert("end", steps + "\n")
+        self.result_box.insert("end", "Matriz resultado:\n")
         for row in matrix:
             self.result_box.insert("end", "   ".join(f"{val:.2f}" for val in row) + "\n")
+
 
     def clear_all(self):
         for widget in self.matrix_frame.winfo_children():
