@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
+from Interfaz.matrices import MatrixCalculator
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY
 from Interfaz import sistema_ecuaciones  # Ajusta si es necesario
 
@@ -190,7 +191,7 @@ class Matrices:
             elif name == "sub1":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 # VectorEquationSolver(self.sub_frames[name])  # Descomenta cuando esté adaptado
-                SubVentana2(self.sub_frames[name])  # Usa placeholder por ahora
+                MatrixCalculator(self.sub_frames[name])  # Usa placeholder por ahora
             else:
                 return
         
