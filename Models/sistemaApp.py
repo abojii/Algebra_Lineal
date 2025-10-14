@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
+from Interfaz.matrices import MatrixCalculator
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY
 from Interfaz import sistema_ecuaciones  # Ajusta si es necesario
 
@@ -158,3 +159,75 @@ class SistemaEcuacionesApp:
             widget.destroy()
         self.entries = []
         self.result_text.delete("1.0", "end")
+ 
+
+class Matrices:
+    def __init__(self, parent, show_subframe_callback):
+        self.parent = parent
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
+        self.show_subframe_callback = show_subframe_callback  # Callback para cambiar sub-frames
+        
+        # Frame contenedor para sub-contenido (donde se cargan las sub-ventanas)
+        self.sub_content_frame = ctk.CTkFrame(self.parent, fg_color=COLOR_BG, corner_radius=0)
+        self.sub_content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Diccionario de sub-frames (se crean lazy, solo cuando se necesitan)
+        self.sub_frames = {}
+        
+        # Mostrar sub-ventana principal por defecto
+        self.show_subframe("principal")
+        
+    def show_subframe(self, name):
+        """Muestra/oculta sub-frames dentro de Vectores."""
+        # Ocultar todos los sub-frames
+        for sub_frame in self.sub_frames.values():
+            sub_frame.pack_forget()
+        
+        # Crear si no existe
+        if name not in self.sub_frames:
+            if name == "principal":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                SistemaEcuacionesApp(self.sub_frames[name])
+            elif name == "sub1":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                # VectorEquationSolver(self.sub_frames[name])  # Descomenta cuando esté adaptado
+                MatrixCalculator(self.sub_frames[name])  # Usa placeholder por ahora
+            else:
+                return
+        
+        # Mostrar el seleccionado
+        self.sub_frames[name].pack(fill="both", expand=True)
+        
+        # Llamar callback para actualizar menú en MainApp (opcional, para sincronizar)
+        if self.show_subframe_callback:
+            self.show_subframe_callback(name)
+
+            
+class SubVentana2:
+    """Sub-ventana 2: Propiedades Algebraicas de ℝⁿ (placeholder adaptado; integra VectorAlgebraPropertiesGUI si está adaptado)."""
+    def __init__(self, parent):
+        self.parent = parent
+        self.parent.configure(fg_color=COLOR_BG)  # Corregido: fg_color en lugar de bg
+        
+        titulo = ctk.CTkLabel(self.parent, text="Sub-Ventana 2: Propiedades Algebraicas de ℝⁿ",
+                              text_color=COLOR_TEXT, fg_color="transparent",
+                              font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"))
+        titulo.pack(pady=20)
+        
+        # Placeholder para contenido (integra aquí VectorAlgebraPropertiesGUI si está adaptado a CTk)
+        # from .propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI
+        # VectorAlgebraPropertiesGUI(self.parent)  # Descomenta cuando esté adaptado
+        
+        descripcion = ctk.CTkLabel(self.parent, text="Contenido para Propiedades de ℝⁿ (en desarrollo).\nUsa el menú lateral para navegar.",
+                                   text_color=COLOR_SUBTEXT, fg_color="transparent",
+                                   font=ctk.CTkFont(size=12))
+        descripcion.pack(pady=10)
+        
+        # Ejemplo de input (adaptado)
+        entry_ejemplo = ctk.CTkEntry(self.parent, width=300, height=30, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT,
+                                      placeholder_text="Ejemplo de entrada...")
+        entry_ejemplo.pack(pady=10)
+        
+        btn_ejemplo = ctk.CTkButton(self.parent, text="Ejemplo de Acción",
+                                    fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30)
+        btn_ejemplo.pack(pady=5)
