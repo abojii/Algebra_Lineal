@@ -2,8 +2,8 @@ import customtkinter as ctk
 import sys
 import os
 from tkinter import messagebox
-from Models.solverHomogeneo import add_matrices
-from Models.solverHomogeneo import sub_matrices
+from Models.solverOperacionesMatrizes import add_matrices
+from Models.solverOperacionesMatrizes import sub_matrices
 
 # Colores personalizados
 COLOR_BG = "#1e1e2f"
