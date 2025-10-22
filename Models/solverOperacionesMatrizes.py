@@ -1,10 +1,10 @@
 
-from Models.solverHomogeneo import create_matrix
+"""from Models.solverHomogeneo import create_matrix
 from Models.solverMatrizInversa import matrix_to_string
 
 
 def _validate_rectangular(mat):
-    """Verifica que la matriz sea rectangular (todas las filas con la misma longitud)."""
+
     if not mat:
         raise ValueError("La matriz no puede estar vacía.")
     ncols = len(mat[0])
@@ -12,17 +12,14 @@ def _validate_rectangular(mat):
         raise ValueError("La matriz no es rectangular (filas con longitudes distintas).")
 
 def _same_shape(A, B):
-    """Lanza error si A y B no tienen el mismo tamaño m x n."""
+
     _validate_rectangular(A)
     _validate_rectangular(B)
     if len(A) != len(B) or len(A[0]) != len(B[0]):
         raise ValueError("Las matrices A y B deben tener el mismo tamaño m x n.")
 
 def add_matrices(A, B, explain=False, precision=4):
-    """
-    C = A + B  (suma elemento a elemento). Requiere mismo tamaño m x n.
-    Si explain=True, devuelve (C, pasos:str) con un log del procedimiento.
-    """
+    
     _same_shape(A, B)
     m, n = len(A), len(A[0])
     C = create_matrix(m, n)
@@ -40,10 +37,7 @@ def add_matrices(A, B, explain=False, precision=4):
     return C
 
 def sub_matrices(A, B, explain=False, precision=4):
-    """
-    C = A - B  (resta elemento a elemento). Requiere mismo tamaño m x n.
-    Si explain=True, devuelve (C, pasos:str) con un log del procedimiento.
-    """
+    
     _same_shape(A, B)
     m, n = len(A), len(A[0])
     C = create_matrix(m, n)
@@ -58,4 +52,4 @@ def sub_matrices(A, B, explain=False, precision=4):
     if explain:
         pasos.append("Resultado:\n" + matrix_to_string(C, precision=precision))
         return C, "\n".join(pasos)
-    return C
+    return C"""

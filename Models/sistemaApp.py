@@ -4,7 +4,9 @@ from Interfaz.matrices import MatrixCalculator
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY
 from Interfaz import Inversa, sistema_ecuaciones
 from Interfaz.matrizTraspuesta import MatrixTranspose
-from Interfaz.Inversa import MatrixInverseApp# Ajusta si es necesario
+from Interfaz.Inversa import MatrixInverseApp
+from Interfaz.propiedadesMultiplicacion import VectorSpaceProperties
+from Interfaz.propiedadesTraspuesta import MatrixTransposeProperties# Ajusta si es necesario
 
 class SistemaEcuacionesApp:
     def __init__(self, parent):
@@ -202,6 +204,15 @@ class Matrices:
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 frame = MatrixInverseApp(self.sub_frames[name])
                 frame.pack(fill="both", expand=True)
+            elif name == "Propiedades":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                frame = VectorSpaceProperties(self.sub_frames[name])
+                frame.pack(fill="both", expand=True)
+            elif name == "Ptraspuesta":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                frame = MatrixTransposeProperties(self.sub_frames[name])
+                frame.pack(fill="both", expand=True)
+                
                 
             else:
                 print("NO SE ABRIO")
