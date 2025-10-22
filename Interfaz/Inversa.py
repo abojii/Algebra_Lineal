@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from Models.solverMatrizInversa import gauss_jordan_inverse, check_theoretical_properties
-
+from fractions import Fraction 
 # Configuración de CustomTkinter
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
@@ -141,18 +141,19 @@ class MatrixInverseApp(ctk.CTkFrame):  # Cambia CTk por CTkFrame
                     self.status_label.configure(text=f"Estado: Error - Campo vacío en {matrix_name}.")
                     return None
                 try:
-                    if '/' in val_str:
-                        num, den = map(float, val_str.split('/'))
-                        if den == 0:
-                            raise ValueError("Denominador cero")
-                        row_vals.append(num / den)
-                    else:
-                        row_vals.append(float(val_str))
-                except ValueError:
-                    messagebox.showerror("Error", f"Valor inválido en {matrix_name}[{i+1}][{j+1}]: '{entry.get()}'.")
+                    #  Convertimos directamente a fracción (Fraction acepta “3/4”, “2”, “0.5”, etc.)
+                    valor = Fraction(val_str)
+                    row_vals.append(valor)
+                except Exception:
+                    messagebox.showerror(
+                        "Error",
+                        f"Valor inválido en {matrix_name}[{i+1}][{j+1}]: '{entry.get()}'. "
+                        "Usa números o fracciones (ej: 1/2, -3/4, 2)."
+                    )
                     self.status_label.configure(text=f"Estado: Error - Valor inválido en {matrix_name}.")
                     return None
             matrix.append(row_vals)
+
         print(f"{matrix_name} leída correctamente: {matrix}")
         return matrix
 
@@ -187,4 +188,3 @@ class MatrixInverseApp(ctk.CTkFrame):  # Cambia CTk por CTkFrame
         self.status_label.configure(text="Estado: Cálculo completado. Revisa los resultados abajo.")
         messagebox.showinfo("Éxito", "Cálculo completado. Revisa los resultados en la ventana.")
         print("Cálculo completado.")
-
