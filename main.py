@@ -169,7 +169,7 @@ class MainApp(ctk.CTk):
                 self.sub_menu_visible2 = True
             return
 
-        num_opciones = 5
+        num_opciones = 6  # Ajustado para incluir más opciones
         height = num_opciones * 35 + 40
 
         self.sub_menu_frame2 = ctk.CTkFrame(self.content_frame, width=250, height=height, fg_color=COLOR_FRAME, corner_radius=10, border_width=2, border_color="#333333")
@@ -188,9 +188,88 @@ class MainApp(ctk.CTk):
         opciones = [("Solucion Matrices", "principal"), ("Operaciones con Matrices", "sub1"),("Matriz Traspuesta", "sub_traspuesta"),("Propiedades Matrices","Propiedades"),("Propiedades Traspuesta","Ptraspuesta"),("Matriz Inversa", "Inversa")]
 
         for text, sub_name in opciones:
+            if sub_name in ["Propiedades", "Ptraspuesta"]:
+                command = lambda n=sub_name: self.show_sub_sub_menu(n)
+            else:
+                command = lambda n=sub_name: self.change_subframe2(n)
+            btn = ctk.CTkButton(self.sub_menu_frame2, text=text, fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30, command=command)
+            btn.pack(fill="x", pady=2, padx=10)
+            self.sub_menu_buttons2[sub_name] = btn
+
+        salir_btn = ctk.CTkButton(self.sub_menu_frame2, text="Salir de Sub-Menú", fg_color="red", text_color="white", corner_radius=5, height=30, command=self.clear_menu2)
+        salir_btn.pack(fill="x", pady=(5, 10), padx=10)
+
+        self.update_sub_menu2(self.current_subframe)
+        self.sub_menu_visible2 = True
+
+    def show_sub_sub_menu(self, type_menu):
+        self.clear_menu2()
+        if type_menu == "Propiedades":
+            self.setup_sub_menu2_properties()
+        elif type_menu == "Ptraspuesta":
+            self.setup_sub_menu2_ptraspuesta()
+
+    def setup_sub_menu2_properties(self):
+        num_opciones = 5  # Número de propiedades, ajusta según necesites
+        height = num_opciones * 35 + 80  # Espacio extra para el botón de volver
+
+        self.sub_menu_frame2 = ctk.CTkFrame(self.content_frame, width=250, height=height, fg_color=COLOR_FRAME, corner_radius=10, border_width=2, border_color="#333333")
+        self.sub_menu_frame2.place(x=10, y=10)
+
+        title_frame = ctk.CTkFrame(self.sub_menu_frame2, fg_color="transparent")
+        title_frame.pack(fill="x", padx=10, pady=(10, 5))
+
+        sub_title = ctk.CTkLabel(title_frame, text="Propiedades Matrices", font=ctk.CTkFont(size=14, weight="bold"), text_color="white")
+        sub_title.pack(side="left")
+
+        collapse_btn = ctk.CTkButton(title_frame, text="X", width=20, height=20, fg_color="red", text_color="white", corner_radius=10, command=self.toggle_sub_menu2, hover_color="darkred")
+        collapse_btn.pack(side="right", padx=(5, 0))
+
+        self.sub_menu_buttons2 = {}
+        # Aquí defines las propiedades específicas. Ajusta según tus necesidades.
+        opciones = [("Propiedad Asociativa", "prop_asoc"), ("Propiedad Distributiva", "prop_dist"), ("Propiedad Conmutativa", "prop_conm"), ("Otra Propiedad", "prop_otra")]
+
+        for text, sub_name in opciones:
             btn = ctk.CTkButton(self.sub_menu_frame2, text=text, fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30, command=lambda n=sub_name: self.change_subframe2(n))
             btn.pack(fill="x", pady=2, padx=10)
             self.sub_menu_buttons2[sub_name] = btn
+
+        volver_btn = ctk.CTkButton(self.sub_menu_frame2, text="Volver", fg_color="orange", text_color="white", corner_radius=5, height=30, command=self.setup_sub_menu2)
+        volver_btn.pack(fill="x", pady=(5, 10), padx=10)
+
+        salir_btn = ctk.CTkButton(self.sub_menu_frame2, text="Salir de Sub-Menú", fg_color="red", text_color="white", corner_radius=5, height=30, command=self.clear_menu2)
+        salir_btn.pack(fill="x", pady=(5, 10), padx=10)
+
+        self.update_sub_menu2(self.current_subframe)
+        self.sub_menu_visible2 = True
+
+    def setup_sub_menu2_ptraspuesta(self):
+        num_opciones = 4  # Número de propiedades de traspuesta, ajusta según necesites
+        height = num_opciones * 35 + 80
+
+        self.sub_menu_frame2 = ctk.CTkFrame(self.content_frame, width=250, height=height, fg_color=COLOR_FRAME, corner_radius=10, border_width=2, border_color="#333333")
+        self.sub_menu_frame2.place(x=10, y=10)
+
+        title_frame = ctk.CTkFrame(self.sub_menu_frame2, fg_color="transparent")
+        title_frame.pack(fill="x", padx=10, pady=(10, 5))
+
+        sub_title = ctk.CTkLabel(title_frame, text="Propiedades Traspuesta", font=ctk.CTkFont(size=14, weight="bold"), text_color="white")
+        sub_title.pack(side="left")
+
+        collapse_btn = ctk.CTkButton(title_frame, text="X", width=20, height=20, fg_color="red", text_color="white", corner_radius=10, command=self.toggle_sub_menu2, hover_color="darkred")
+        collapse_btn.pack(side="right", padx=(5, 0))
+
+        self.sub_menu_buttons2 = {}
+        # Propiedades de traspuesta
+        opciones = [("(A+B)^T = A^T + B^T", "ptras1"), ("(AB)^T = B^T A^T", "ptras2"), ("(A^T)^T = A", "ptras3")]
+
+        for text, sub_name in opciones:
+            btn = ctk.CTkButton(self.sub_menu_frame2, text=text, fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30, command=lambda n=sub_name: self.change_subframe2(n))
+            btn.pack(fill="x", pady=2, padx=10)
+            self.sub_menu_buttons2[sub_name] = btn
+
+        volver_btn = ctk.CTkButton(self.sub_menu_frame2, text="Volver", fg_color="orange", text_color="white", corner_radius=5, height=30, command=self.setup_sub_menu2)
+        volver_btn.pack(fill="x", pady=(5, 10), padx=10)
 
         salir_btn = ctk.CTkButton(self.sub_menu_frame2, text="Salir de Sub-Menú", fg_color="red", text_color="white", corner_radius=5, height=30, command=self.clear_menu2)
         salir_btn.pack(fill="x", pady=(5, 10), padx=10)
@@ -221,7 +300,7 @@ class MainApp(ctk.CTk):
             self.update_sub_menu(sub_name)
 
     def change_subframe2(self, sub_name):
-        if hasattr(self, 'sistema_app') and self.other_app:
+        if hasattr(self, 'sistema_app') and self.sistema_app:  # Corregido: usa self.sistema_app en lugar de self.other_app
             self.sistema_app.show_subframe(sub_name)
             self.current_subframe = sub_name
             self.update_sub_menu2(sub_name)
