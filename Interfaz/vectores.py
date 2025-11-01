@@ -1,11 +1,12 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import re  # Mantenido si se usa en otros módulos
-from Interfaz import propiedadesAlgb_Rn
+from Interfaz.Vectores import propiedadesAlgb_Rn
+from Interfaz.Vectores import homogeneo
 from constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY  # Import relativo desde config.py
-from Interfaz import homogeneo, sistema_ecuaciones  # Asumiendo que está en Interfaz/
-from Interfaz.vertorequalsolver import VectorEquationSolver  # Adáptalo si usa Tkinter
-from Interfaz.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI  # Adáptalo si usa Tkinter
+from Interfaz.Vectores import sistema_ecuaciones  # Asumiendo que está en Interfaz/
+from Interfaz.Vectores.vertorequalsolver import VectorEquationSolver  # Adáptalo si usa Tkinter
+from Interfaz.Vectores.propiedadesAlgb_Rn import VectorAlgebraPropertiesGUI  # Adáptalo si usa Tkinter
 
 class SubVentanaPrincipal:
     """Sub-ventana principal (la que se muestra por defecto en 'Vectores')."""

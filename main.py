@@ -1,9 +1,9 @@
 import customtkinter as ctk
-from Models.sistemaApp import SistemaEcuacionesApp
-from Models.sistemaApp import Matrices
+from Interfaz.sistemaApp import SistemaEcuacionesApp
+from Interfaz.sistemaApp import Matrices
 from Interfaz.vectores import SubVentana3
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_BUTTON
-from Interfaz.vectores import Vectores  # Si Vectores usa 'bg', esto fallará; adáptalo a CTk
+from Interfaz.vectores import Vectores
 
 class MainApp(ctk.CTk):
     def __init__(self):
@@ -37,12 +37,6 @@ class MainApp(ctk.CTk):
         # Crear frames para cada "pantalla"
         self.frames = {}
 
-        frame_calc = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
-        self.frames["calc"] = frame_calc
-        self.sistema_app = SistemaEcuacionesApp(frame_calc)
-        
-        # Frame para la calculadora de álgebra lineal
-        
         # Frame para el menu principal
         frame_menu = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
         self.frames["menu"] = frame_menu
@@ -51,21 +45,30 @@ class MainApp(ctk.CTk):
         # Frame para la calculadora de álgebra lineal (Matrices)
         frame_calc = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
         self.frames["calc"] = frame_calc
-        self.sistema_app = Matrices(frame_calc, lambda *args: self.update_sub_menu2(*args))
+        
+        # Definir el callback como una función interna para capturar 'self' correctamente
+        def update_sub_menu2_callback(name):
+            self.update_sub_menu2(name)
+        
+        self.sistema_app = Matrices(frame_calc, update_sub_menu2_callback)
 
         # Frame para vectores
         frame_otra = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
         self.frames["otra"] = frame_otra
-        # Corrige el callback para preservar 'self'
-        self.other_app = Vectores(frame_otra, lambda *args: self.update_sub_menu(*args))  # Pasa callback enlazado
+        
+        # Definir el callback como una función interna para capturar 'self' correctamente
+        def update_sub_menu_callback(name):
+            self.update_sub_menu(name)
+        
+        self.other_app = Vectores(frame_otra, update_sub_menu_callback)
 
         # Mostrar inicialmente el menú
         self.show_frame("menu")
 
         self.menu_visible = True
         self.current_subframe = "principal"
-        self.sub_menu_buttons = {}  # Inicializado aquí para seguridad
-        self.sub_menu_buttons2 = {}  # Para el segundo submenú
+        self.sub_menu_buttons = {}
+        self.sub_menu_buttons2 = {}
         self.sub_menu_active = False
         self.sub_menu_visible = True
         self.sub_menu_active2 = False
@@ -111,8 +114,6 @@ class MainApp(ctk.CTk):
                 self.setup_sub_menu()
                 self.sub_menu_active = True
                 if hasattr(self, 'sub_menu_frame') and not self.sub_menu_visible:
-                    self.toggle_sub_menu()  # Expande si estaba colapsado
-              # Expande si estaba colapsado
                     self.toggle_sub_menu()
             elif name == "calc":
                 self.clear_menu()
@@ -169,7 +170,7 @@ class MainApp(ctk.CTk):
                 self.sub_menu_visible2 = True
             return
 
-        num_opciones = 6  # Ajustado para incluir más opciones
+        num_opciones = 6
         height = num_opciones * 35 + 40
 
         self.sub_menu_frame2 = ctk.CTkFrame(self.content_frame, width=250, height=height, fg_color=COLOR_FRAME, corner_radius=10, border_width=2, border_color="#333333")
@@ -185,7 +186,9 @@ class MainApp(ctk.CTk):
         collapse_btn.pack(side="right", padx=(5, 0))
 
         self.sub_menu_buttons2 = {}
-        opciones = [("Solucion Matrices", "principal"), ("Operaciones con Matrices", "sub1"),("Matriz Traspuesta", "sub_traspuesta"),("Propiedades Matrices","Propiedades"),("Propiedades Traspuesta","Ptraspuesta"),("Matriz Inversa", "Inversa")]
+        opciones = [("Solucion Matrices", "principal"), ("Operaciones con Matrices", "sub1"),
+                    ("Matriz Traspuesta", "sub_traspuesta"),("Propiedades","Propiedades"),
+                    ("Matriz Inversa", "Inversa"),("Determinante Matriz", "DeterminanteMa")]
 
         for text, sub_name in opciones:
             if sub_name in ["Propiedades", "Ptraspuesta"]:
@@ -207,11 +210,16 @@ class MainApp(ctk.CTk):
         if type_menu == "Propiedades":
             self.setup_sub_menu2_properties()
         elif type_menu == "Ptraspuesta":
-            self.setup_sub_menu2_ptraspuesta()
+            print("No implementado")
+
+    def volver_a_sub_menu_principal(self):
+        self.clear_menu2()
+        self.current_subframe = "principal"
+        self.setup_sub_menu2()
 
     def setup_sub_menu2_properties(self):
-        num_opciones = 5  # Número de propiedades, ajusta según necesites
-        height = num_opciones * 35 + 80  # Espacio extra para el botón de volver
+        num_opciones = 5
+        height = num_opciones * 35 + 80
 
         self.sub_menu_frame2 = ctk.CTkFrame(self.content_frame, width=250, height=height, fg_color=COLOR_FRAME, corner_radius=10, border_width=2, border_color="#333333")
         self.sub_menu_frame2.place(x=10, y=10)
@@ -226,15 +234,14 @@ class MainApp(ctk.CTk):
         collapse_btn.pack(side="right", padx=(5, 0))
 
         self.sub_menu_buttons2 = {}
-        # Aquí defines las propiedades específicas. Ajusta según tus necesidades.
-        opciones = [("Propiedad Asociativa", "prop_asoc"), ("Propiedad Distributiva", "prop_dist"), ("Propiedad Conmutativa", "prop_conm"), ("Otra Propiedad", "prop_otra")]
+        opciones = [("Propiedad Matrices", "Propiedades"), ("Propiedades Traspuesta", "Ptraspuesta")]
 
         for text, sub_name in opciones:
             btn = ctk.CTkButton(self.sub_menu_frame2, text=text, fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30, command=lambda n=sub_name: self.change_subframe2(n))
             btn.pack(fill="x", pady=2, padx=10)
             self.sub_menu_buttons2[sub_name] = btn
 
-        volver_btn = ctk.CTkButton(self.sub_menu_frame2, text="Volver", fg_color="orange", text_color="white", corner_radius=5, height=30, command=self.setup_sub_menu2)
+        volver_btn = ctk.CTkButton(self.sub_menu_frame2, text="Volver", fg_color="orange", text_color="white", corner_radius=5, height=30, command=self.volver_a_sub_menu_principal)
         volver_btn.pack(fill="x", pady=(5, 10), padx=10)
 
         salir_btn = ctk.CTkButton(self.sub_menu_frame2, text="Salir de Sub-Menú", fg_color="red", text_color="white", corner_radius=5, height=30, command=self.clear_menu2)
@@ -243,39 +250,6 @@ class MainApp(ctk.CTk):
         self.update_sub_menu2(self.current_subframe)
         self.sub_menu_visible2 = True
 
-    def setup_sub_menu2_ptraspuesta(self):
-        num_opciones = 4  # Número de propiedades de traspuesta, ajusta según necesites
-        height = num_opciones * 35 + 80
-
-        self.sub_menu_frame2 = ctk.CTkFrame(self.content_frame, width=250, height=height, fg_color=COLOR_FRAME, corner_radius=10, border_width=2, border_color="#333333")
-        self.sub_menu_frame2.place(x=10, y=10)
-
-        title_frame = ctk.CTkFrame(self.sub_menu_frame2, fg_color="transparent")
-        title_frame.pack(fill="x", padx=10, pady=(10, 5))
-
-        sub_title = ctk.CTkLabel(title_frame, text="Propiedades Traspuesta", font=ctk.CTkFont(size=14, weight="bold"), text_color="white")
-        sub_title.pack(side="left")
-
-        collapse_btn = ctk.CTkButton(title_frame, text="X", width=20, height=20, fg_color="red", text_color="white", corner_radius=10, command=self.toggle_sub_menu2, hover_color="darkred")
-        collapse_btn.pack(side="right", padx=(5, 0))
-
-        self.sub_menu_buttons2 = {}
-        # Propiedades de traspuesta
-        opciones = [("(A+B)^T = A^T + B^T", "ptras1"), ("(AB)^T = B^T A^T", "ptras2"), ("(A^T)^T = A", "ptras3")]
-
-        for text, sub_name in opciones:
-            btn = ctk.CTkButton(self.sub_menu_frame2, text=text, fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30, command=lambda n=sub_name: self.change_subframe2(n))
-            btn.pack(fill="x", pady=2, padx=10)
-            self.sub_menu_buttons2[sub_name] = btn
-
-        volver_btn = ctk.CTkButton(self.sub_menu_frame2, text="Volver", fg_color="orange", text_color="white", corner_radius=5, height=30, command=self.setup_sub_menu2)
-        volver_btn.pack(fill="x", pady=(5, 10), padx=10)
-
-        salir_btn = ctk.CTkButton(self.sub_menu_frame2, text="Salir de Sub-Menú", fg_color="red", text_color="white", corner_radius=5, height=30, command=self.clear_menu2)
-        salir_btn.pack(fill="x", pady=(5, 10), padx=10)
-
-        self.update_sub_menu2(self.current_subframe)
-        self.sub_menu_visible2 = True
 
     def toggle_sub_menu(self):
         if self.sub_menu_visible:
@@ -300,7 +274,7 @@ class MainApp(ctk.CTk):
             self.update_sub_menu(sub_name)
 
     def change_subframe2(self, sub_name):
-        if hasattr(self, 'sistema_app') and self.sistema_app:  # Corregido: usa self.sistema_app en lugar de self.other_app
+        if hasattr(self, 'sistema_app') and self.sistema_app:
             self.sistema_app.show_subframe(sub_name)
             self.current_subframe = sub_name
             self.update_sub_menu2(sub_name)

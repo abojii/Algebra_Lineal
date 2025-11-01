@@ -9,6 +9,8 @@ COLOR_TEXT = "#ffffff"
 COLOR_SUBTEXT = "#bbbbbb"
 COLOR_BUTTON = "#3b82f6"
 COLOR_ENTRY = "#3a3a4f"
+COLOR_BUTTON1 = "#f87171"
+COLOR_BUTTON2 = "#4ade80"
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -50,9 +52,9 @@ class DeterminantCalculator(ctk.CTkFrame):
         # Botones
         ctk.CTkButton(header, text="Generar", fg_color=COLOR_BUTTON,
                       command=self.generate_matrix).grid(row=0, column=4, padx=10)
-        ctk.CTkButton(header, text="Calcular", fg_color=COLOR_BUTTON,
+        ctk.CTkButton(header, text="Calcular", fg_color=COLOR_BUTTON2, text_color="black",
                       command=self.solve).grid(row=0, column=5, padx=10)
-        ctk.CTkButton(header, text="Limpiar", fg_color=COLOR_BUTTON,
+        ctk.CTkButton(header, text="Limpiar", fg_color=COLOR_BUTTON1,text_color="black",
                       command=self.clear_all).grid(row=0, column=6, padx=10)
 
         # --- Área de la matriz ---

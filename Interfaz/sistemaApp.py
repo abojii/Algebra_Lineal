@@ -1,12 +1,14 @@
 import customtkinter as ctk
 from tkinter import messagebox
-from Interfaz.matrices import MatrixCalculator
+from Interfaz.Matrices import Inversa
+from Interfaz.Matrices.determinante import DeterminantCalculator
+from Interfaz.Matrices.operacionesMatrices import MatrixCalculator
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY
-from Interfaz import Inversa, sistema_ecuaciones
-from Interfaz.matrizTraspuesta import MatrixTranspose
-from Interfaz.Inversa import MatrixInverseApp
-from Interfaz.propiedadesMultiplicacion import VectorSpaceProperties
-from Interfaz.propiedadesTraspuesta import MatrixTransposeProperties# Ajusta si es necesario
+from Interfaz.Vectores import sistema_ecuaciones
+from Interfaz.Matrices.matrizTraspuesta import MatrixTranspose
+from Interfaz.Matrices.Inversa import MatrixInverseApp
+from Interfaz.Matrices.propiedadesMultiplicacion import VectorSpaceProperties
+from Interfaz.Matrices.propiedadesTraspuesta import MatrixTransposeProperties# Ajusta si es necesario
 
 class SistemaEcuacionesApp:
     def __init__(self, parent):
@@ -211,6 +213,10 @@ class Matrices:
             elif name == "Ptraspuesta":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 frame = MatrixTransposeProperties(self.sub_frames[name])
+                frame.pack(fill="both", expand=True)
+            elif name == "DeterminanteMa":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                frame = DeterminantCalculator(self.sub_frames[name])
                 frame.pack(fill="both", expand=True)
                 
                 
