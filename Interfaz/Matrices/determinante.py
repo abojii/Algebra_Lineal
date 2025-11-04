@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
-import numpy as np
+from Models.solverDeterminante import DeterminantSolver
 
 # ===== Colores personalizados =====
 COLOR_BG = "#1e1e2f"
@@ -20,6 +20,7 @@ class DeterminantCalculator(ctk.CTkFrame):
         super().__init__(parent, fg_color=COLOR_BG)
         self.parent = parent
         self.pack(fill="both", expand=True)
+        self.solver = DeterminantSolver()
 
         # --- Título ---
         title_label = ctk.CTkLabel(self,
@@ -94,7 +95,7 @@ class DeterminantCalculator(ctk.CTkFrame):
     # --- Obtener matriz desde los inputs ---
     def get_matrix(self):
         try:
-            return np.array([[float(e.get()) for e in row] for row in self.entries_A])
+            return [[float(e.get()) for e in row] for row in self.entries_A]
         except ValueError:
             messagebox.showerror("Error", "Todos los valores deben ser numéricos.")
             return None
@@ -107,85 +108,59 @@ class DeterminantCalculator(ctk.CTkFrame):
 
         metodo = self.method_var.get()
         n = len(A)
+        self.solver.steps = []  # Limpiar pasos previos
         steps_text = f"--- Método seleccionado: {metodo} ---\n\n"
 
         if metodo == "Cramer":
             if n > 3:
                 messagebox.showwarning("No aplicable", "El método de Cramer solo se usa para matrices pequeñas (2x2 o 3x3).")
                 return
-            steps_text += self.metodo_cramer(A)
+            det = self.solver.det_cramer(A)
+            steps_text += "\n".join(self.solver.steps) + f"\n\nDeterminante: {det}"
 
         elif metodo == "Sarrus":
             if n != 3:
                 messagebox.showwarning("No aplicable", "La regla de Sarrus solo aplica a matrices 3x3.")
                 return
-            steps_text += self.regla_sarrus(A)
+            det = self.solver.det_sarrus(A)
+            steps_text += "\n".join(self.solver.steps) + f"\n\nDeterminante: {det}"
 
         elif metodo == "Cofactores":
-            steps_text += self.expansion_cofactores(A)
+            det = self.solver.det_cofactor(A)
+            steps_text += "\n".join(self.solver.steps) + f"\n\nDeterminante: {det}"
+
+        # Interpretar invertibilidad
+        steps_text += "\n\n" + self.solver.interpret_invertibility(det)
+
+        # Verificar propiedades
+        steps_text += "\n\n--- Verificación de Propiedades ---\n"
+        if self.solver.check_property1(A):
+            steps_text += "Propiedad 1: Sí, una fila o columna es cero.\n"
+        else:
+            steps_text += "Propiedad 1: No, ninguna fila o columna es cero.\n"
+
+        if self.solver.check_property2(A):
+            steps_text += "Propiedad 2: Sí, dos filas o columnas son iguales o proporcionales.\n"
+        else:
+            steps_text += "Propiedad 2: No, ninguna fila o columna es igual o proporcional.\n"
+
+        if self.solver.check_property3(A):
+            steps_text += "Propiedad 3: Sí, intercambiar filas cambia el signo del determinante.\n"
+        else:
+            steps_text += "Propiedad 3: No, intercambiar filas no cambia el signo.\n"
+
+        if self.solver.check_property4(A):
+            steps_text += "Propiedad 4: Sí, multiplicar fila por k multiplica el determinante por k.\n"
+        else:
+            steps_text += "Propiedad 4: No, multiplicar fila por k no multiplica el determinante por k.\n"
+
+        if self.solver.check_property5(A):
+            steps_text += "Propiedad 5: Sí, det(AB) = det(A) * det(B).\n"
+        else:
+            steps_text += "Propiedad 5: No, det(AB) != det(A) * det(B).\n"
 
         self.result_box.delete("1.0", "end")
         self.result_box.insert("end", steps_text)
-
-    # --- Método de Cramer (2x2 o 3x3) ---
-    def metodo_cramer(self, A):
-        n = len(A)
-        text = "=== Método de Cramer ===\n"
-        if n == 2:
-            det = A[0, 0]*A[1, 1] - A[0, 1]*A[1, 0]
-            text += f"Det(A) = ({A[0,0]}×{A[1,1]}) - ({A[0,1]}×{A[1,0]}) = {det}\n\n"
-        elif n == 3:
-            text += self.regla_sarrus(A)
-            det = (A[0, 0]*A[1, 1]*A[2, 2] + A[0, 1]*A[1, 2]*A[2, 0] + A[0, 2]*A[1, 0]*A[2, 1]) \
-                  - (A[0, 2]*A[1, 1]*A[2, 0] + A[0, 0]*A[1, 2]*A[2, 1] + A[0, 1]*A[1, 0]*A[2, 2])
-            text += f"Determinante final (Cramer): {det}\n\n"
-        return text
-
-    # --- Regla de Sarrus ---
-    def regla_sarrus(self, A):
-        if A.shape != (3, 3):
-            return "Regla de Sarrus solo aplicable a 3x3.\n"
-
-        text = "=== Regla de Sarrus (3x3) ===\n"
-        text += "Se suman los productos de las diagonales principales y se restan las inversas.\n\n"
-        d1 = A[0, 0]*A[1, 1]*A[2, 2]
-        d2 = A[0, 1]*A[1, 2]*A[2, 0]
-        d3 = A[0, 2]*A[1, 0]*A[2, 1]
-        i1 = A[0, 2]*A[1, 1]*A[2, 0]
-        i2 = A[0, 0]*A[1, 2]*A[2, 1]
-        i3 = A[0, 1]*A[1, 0]*A[2, 2]
-        det = (d1 + d2 + d3) - (i1 + i2 + i3)
-
-        text += f"Diagonal 1: {A[0,0]}×{A[1,1]}×{A[2,2]} = {d1}\n"
-        text += f"Diagonal 2: {A[0,1]}×{A[1,2]}×{A[2,0]} = {d2}\n"
-        text += f"Diagonal 3: {A[0,2]}×{A[1,0]}×{A[2,1]} = {d3}\n"
-        text += f"Inversas: {i1}, {i2}, {i3}\n"
-        text += f"Det(A) = ({d1}+{d2}+{d3}) - ({i1}+{i2}+{i3}) = {det}\n\n"
-        return text
-
-    # --- Expansión por Cofactores ---
-    def expansion_cofactores(self, A):
-        text = "=== Expansión por Cofactores ===\n"
-        det, steps = self.det_cofactor(A, 0)
-        text += steps
-        text += f"\nDeterminante final (Cofactores): {det}\n"
-        return text
-
-    def det_cofactor(self, A, nivel):
-        n = len(A)
-        if n == 1:
-            return A[0, 0], f"{'  ' * nivel}Det({A[0,0]}) = {A[0,0]}\n"
-        det = 0
-        steps = ""
-        for j in range(n):
-            signo = (-1)**j
-            minor = np.delete(np.delete(A, 0, axis=0), j, axis=1)
-            subdet, substeps = self.det_cofactor(minor, nivel + 1)
-            term = signo * A[0, j] * subdet
-            det += term
-            steps += f"{'  '*nivel}Cofactor({0},{j}) = (-1)^({0}+{j}) * {A[0,j]} * det(Minor) = {signo} * {A[0,j]} * {subdet} = {term}\n"
-            steps += substeps
-        return det, steps
 
     # --- Limpiar todo ---
     def clear_all(self):

@@ -3,6 +3,7 @@ from tkinter import messagebox
 from Interfaz.Matrices import Inversa
 from Interfaz.Matrices.determinante import DeterminantCalculator
 from Interfaz.Matrices.operacionesMatrices import MatrixCalculator
+from Interfaz.Matrices.propiedadesDeterminante import PropiedadesDeterminanteApp
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_TEXT, COLOR_SUBTEXT, COLOR_BUTTON, COLOR_ENTRY
 from Interfaz.Vectores import sistema_ecuaciones
 from Interfaz.Matrices.matrizTraspuesta import MatrixTranspose
@@ -218,8 +219,10 @@ class Matrices:
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 frame = DeterminantCalculator(self.sub_frames[name])
                 frame.pack(fill="both", expand=True)
-                
-                
+            elif name == "DeterPropiedades":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                frame = PropiedadesDeterminanteApp(self.sub_frames[name])
+                frame.pack(fill="both", expand=True)
             else:
                 print("NO SE ABRIO")
                 return

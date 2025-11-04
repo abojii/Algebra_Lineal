@@ -13,6 +13,8 @@ COLOR_TEXT = "#ffffff"
 COLOR_SUBTEXT = "#bbbbbb"
 COLOR_BUTTON = "#3b82f6"
 COLOR_ENTRY = "#3a3a4f"
+COLOR_BUTTON1 = "#f87171"
+COLOR_BUTTON2 = "#4ade80"
 
 class MatrixInverseApp(ctk.CTkFrame):  # Cambia CTk por CTkFrame
     def __init__(self, parent):
@@ -53,10 +55,10 @@ class MatrixInverseApp(ctk.CTkFrame):  # Cambia CTk por CTkFrame
         self.generate_btn = ctk.CTkButton(config_frame, text="Generar Campos", command=self.generar_campos, width=100, fg_color=COLOR_BUTTON)  # Color del botón
         self.generate_btn.grid(row=0, column=2, padx=10, pady=10)
 
-        self.calculate_btn = ctk.CTkButton(config_frame, text="Calcular Inversa", command=self.calcular_inversa, width=100, state="disabled", fg_color=COLOR_BUTTON)  # Color del botón
+        self.calculate_btn = ctk.CTkButton(config_frame, text="Calcular Inversa",text_color="black", command=self.calcular_inversa, width=100, state="disabled", fg_color=COLOR_BUTTON2)  # Color del botón
         self.calculate_btn.grid(row=0, column=3, padx=5, pady=10)
 
-        self.clear_btn = ctk.CTkButton(config_frame, text="Limpiar", command=self.limpiar, width=100, fg_color=COLOR_BUTTON)  # Color del botón
+        self.clear_btn = ctk.CTkButton(config_frame, text="Limpiar", command=self.limpiar, width=100, fg_color=COLOR_BUTTON1)  # Color del botón
         self.clear_btn.grid(row=0, column=4, padx=10, pady=10)
 
         self.frame_a = ctk.CTkFrame(self, fg_color="transparent")

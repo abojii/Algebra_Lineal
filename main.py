@@ -234,7 +234,7 @@ class MainApp(ctk.CTk):
         collapse_btn.pack(side="right", padx=(5, 0))
 
         self.sub_menu_buttons2 = {}
-        opciones = [("Propiedad Matrices", "Propiedades"), ("Propiedades Traspuesta", "Ptraspuesta")]
+        opciones = [("Propiedad Matrices", "Propiedades"), ("Propiedades Traspuesta", "Ptraspuesta"),("Propiedades Determinantes","DeterPropiedades")]
 
         for text, sub_name in opciones:
             btn = ctk.CTkButton(self.sub_menu_frame2, text=text, fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=30, command=lambda n=sub_name: self.change_subframe2(n))
