@@ -410,9 +410,7 @@ class SubVentana3:
                                    font=ctk.CTkFont(size=12))
         descripcion.pack(pady=10)
         
-        volver_btn = ctk.CTkButton(self.parent, text="Volver al Menú Principal",
-                                   fg_color="#ff6b6b", text_color="white", corner_radius=5, height=30)
-        volver_btn.pack(pady=10)
+        
 
 
 class Vectores:

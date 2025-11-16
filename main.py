@@ -1,11 +1,110 @@
 import customtkinter as ctk
 from Interfaz.sistemaApp import SistemaEcuacionesApp
 from Interfaz.sistemaApp import Matrices
-from Interfaz.vectores import SubVentana3
+from Interfaz.menu import MenuDashboard
 from Interfaz.constantes import COLOR_BG, COLOR_FRAME, COLOR_BUTTON
 from Interfaz.vectores import Vectores
-from PIL import Image
-#from Interfaz.config import open_config_window, open_help_window
+
+# Paleta de colores (mezcla tus constantes con el ejemplo para profesionalismo)
+COLOR_HOVER = "#1F2937"  # Hover para botones
+COLOR_ACTIVE = "#2563EB"  # Azul para activo
+COLOR_TEXT = "#E5E7EB"    # Texto principal
+COLOR_SUBTEXT = "#9CA3AF" # Texto secundario
+SEPARATOR_COLOR = "#1A2234"  # Para separadores
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("dark-blue")
+
+class SidebarButton(ctk.CTkButton):
+    def __init__(self, master, text, icon=None, command=None, active=False):
+        super().__init__(
+            master,
+            text=text,  # Solo el texto (sin icono aquí)
+            image=icon,  # Icono separado (si es CTkImage)
+            fg_color=COLOR_ACTIVE if active else "transparent",
+            hover_color=COLOR_HOVER,
+            text_color=COLOR_TEXT if active else COLOR_SUBTEXT,
+            anchor="w",
+            font=("Segoe UI", 14),
+            corner_radius=10,
+            height=40,
+            command=command
+        )
+        self.active = active
+        self.default_text_color = COLOR_SUBTEXT
+
+    def activate(self):
+        self.configure(fg_color=COLOR_ACTIVE, text_color=COLOR_TEXT)
+        self.active = True
+
+    def deactivate(self):
+        self.configure(fg_color="transparent", text_color=self.default_text_color)
+        self.active = False
+
+class Sidebar(ctk.CTkFrame):
+    def __init__(self, master, main_app):
+        super().__init__(master, fg_color="#1A202C", width=250)
+        self.pack_propagate(False)
+        self.main_app = main_app
+
+        # Cargar iconos
+        from PIL import Image
+        self.config_icon = ctk.CTkImage(Image.open("icons/settings.png"), size=(18, 18))
+        self.help_icon = ctk.CTkImage(Image.open("icons/help.png"), size=(16, 16))
+        self.home_icon = ctk.CTkImage(Image.open("icons/casa.png"), size=(25,25))
+        self.matriz_icon = ctk.CTkImage(Image.open("icons/matriz.png"), size=(22,22))
+        self.vector_icon = ctk.CTkImage(Image.open("icons/vector.png"), size=(22,22))
+        self.error_icon = ctk.CTkImage(Image.open("icons/cancelar.png"), size=(22,22))
+
+        # Título del sidebar
+        title = ctk.CTkLabel(self, text="📘 Álgebra Lineal", font=("Segoe UI", 22, "bold"), text_color=COLOR_TEXT)
+        title.pack(pady=(20, 10), padx=10, anchor="w")
+
+        # Sección: PRINCIPAL
+        section1 = ctk.CTkLabel(self, text="PRINCIPAL", font=("Segoe UI", 12), text_color=COLOR_SUBTEXT)
+        section1.pack(pady=(10, 5), padx=10, anchor="w")
+
+        # Botones principales con emoji en texto
+        self.btn_menu = SidebarButton(self, "Menu",self.home_icon, command=lambda: self.main_app.show_frame("menu"))
+        self.btn_matrices = SidebarButton(self, "Matrices",self.matriz_icon, command=lambda: self.main_app.show_frame("calc"))
+        self.btn_vectores = SidebarButton(self, "Vectores",self.vector_icon, command=lambda: self.main_app.show_frame("otra"))
+        self.btn_errores = SidebarButton(self, "Errores",self.error_icon, command=lambda: self.main_app.show_frame("error"))
+
+        self.buttons_principal = [self.btn_menu, self.btn_matrices, self.btn_vectores, self.btn_errores]
+        for b in self.buttons_principal:
+            b.pack(fill="x", pady=3, padx=10)
+
+        # Separador
+        ctk.CTkFrame(self, fg_color=SEPARATOR_COLOR, height=2).pack(fill="x", pady=15)
+
+        # Sección: HERRAMIENTAS
+        section2 = ctk.CTkLabel(self, text="HERRAMIENTAS", font=("Segoe UI", 12), text_color=COLOR_SUBTEXT)
+        section2.pack(pady=(5, 5), padx=10, anchor="w")
+
+        # Botones con iconos PNG (image separado)
+        self.btn_config = SidebarButton(self, "Configuración", self.config_icon, command=lambda: self.main_app.open_config_window())
+        self.btn_ayuda = SidebarButton(self, "Ayuda", self.help_icon, command=lambda: self.main_app.open_help_window())
+
+        self.buttons_herramientas = [self.btn_config, self.btn_ayuda]
+        for b in self.buttons_herramientas:
+            b.pack(fill="x", pady=3, padx=10)
+
+        # Activar "Menu" por defecto
+        self.btn_menu.activate()
+
+    def update_active_button(self, frame_name):
+        # Desactivar todos
+        for b in self.buttons_principal + self.buttons_herramientas:
+            b.deactivate()
+        # Activar el correspondiente
+        if frame_name == "menu":
+            self.btn_menu.activate()
+        elif frame_name == "calc":
+            self.btn_matrices.activate()
+        elif frame_name == "otra":
+            self.btn_vectores.activate()
+        elif frame_name == "error":
+            self.btn_errores.activate()
 
 class MainApp(ctk.CTk):
     def __init__(self):
@@ -13,9 +112,7 @@ class MainApp(ctk.CTk):
         self.title("Aplicacion Calculadora algebra lineal")
         self.geometry("900x600")
         self.configure(fg_color=COLOR_BG)
-    
-        self.config_icon = ctk.CTkImage(Image.open("icons/settings.png"), size=(25, 25))  # Ajusta ruta y tamaño
-        self.help_icon = ctk.CTkImage(Image.open("icons/help.png"), size=(25, 25))
+        # Frame para el contenido principal
 
         # Frame toggle
         self.toggle_frame = ctk.CTkFrame(self, width=30, fg_color=COLOR_FRAME, corner_radius=0)
@@ -25,30 +122,26 @@ class MainApp(ctk.CTk):
                                            fg_color=COLOR_BUTTON, text_color="white", width=30, height=30, corner_radius=5)
         self.toggle_button.pack(pady=10, padx=5)
 
-        # Frame para el menú lateral
-        self.menu_frame = ctk.CTkFrame(self, width=150, fg_color=COLOR_FRAME, corner_radius=0)
-        self.menu_frame.pack(side="left", fill="y")
-
-        # Frame para los botones del menú principal
-        self.buttons_frame = ctk.CTkFrame(self.menu_frame, fg_color=COLOR_FRAME, corner_radius=0)
-        self.buttons_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-        self.create_menu_buttons()
+        # Sidebar (reemplaza menu_frame y buttons_frame)
+        self.sidebar = Sidebar(self, self)  # Pasa self para referencia
+        self.sidebar.pack(side="left", fill="y")
 
         # Frame para el contenido principal
-        self.content_frame = ctk.CTkFrame(self, fg_color=COLOR_BG, corner_radius=0)
+        self.content_frame = ctk.CTkFrame(self, fg_color=COLOR_BG, corner_radius=0, border_width=1, border_color="#374151")  # Agrega borde gris oscuro
         self.content_frame.pack(side="left", fill="both", expand=True)
 
         # Crear frames para cada "pantalla"
         self.frames = {}
 
         # Frame para el menu principal
-        frame_menu = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
+        frame_menu = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0,border_width=1,
+                border_color="#374151")
         self.frames["menu"] = frame_menu
-        self.sistema_app = SubVentana3(frame_menu)
+        self.menu_dashboard = MenuDashboard(frame_menu, lambda name: self.show_frame(name))  # Pasa callback en lugar de self
 
         # Frame para la calculadora de álgebra lineal (Matrices)
-        frame_calc = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
+        frame_calc = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0,border_width=1,
+                                border_color="#374151")
         self.frames["calc"] = frame_calc
         
         # Definir el callback como una función interna para capturar 'self' correctamente
@@ -58,7 +151,8 @@ class MainApp(ctk.CTk):
         self.sistema_app = Matrices(frame_calc, update_sub_menu2_callback)
 
         # Frame para vectores
-        frame_otra = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0)
+        frame_otra = ctk.CTkFrame(self.content_frame, fg_color=COLOR_BG, corner_radius=0,border_width=1,
+                                border_color="#374151")
         self.frames["otra"] = frame_otra
         
         # Definir el callback como una función interna para capturar 'self' correctamente
@@ -79,55 +173,20 @@ class MainApp(ctk.CTk):
         self.sub_menu_active2 = False
         self.sub_menu_visible2 = True
 
-    def create_menu_buttons(self):
-        for widget in self.buttons_frame.winfo_children():
-            widget.destroy()
-
-        # Botones existentes
-        btn_menu = ctk.CTkButton(self.buttons_frame, text="Menu",
-                                fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=40,
-                                command=lambda: self.show_frame("menu"))
-        btn_menu.pack(fill="x", pady=5, padx=5)
-        
-        btn_matrices = ctk.CTkButton(self.buttons_frame, text="Matrices",
-                                    fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=40,
-                                    command=lambda: self.show_frame("calc"))
-        btn_matrices.pack(fill="x", pady=5, padx=5)
-        
-        btn_vectores = ctk.CTkButton(self.buttons_frame, text="Vectores",
-                                    fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=40,
-                                    command=lambda: self.show_frame("otra"))
-        btn_vectores.pack(fill="x", pady=5, padx=5)
-        
-        btn_errores = ctk.CTkButton(self.buttons_frame, text="Errores",
-                                    fg_color=COLOR_BUTTON, text_color="white", corner_radius=5, height=40,
-                                    command=lambda: self.show_frame("error"))
-        btn_errores.pack(fill="x", pady=5, padx=5)
-
-        # Frame para botones inferiores (pequeños y cuadrados)
-        self.bottom_buttons_frame = ctk.CTkFrame(self.menu_frame, fg_color=COLOR_FRAME, corner_radius=0)
-        self.bottom_buttons_frame.pack(side="bottom", fill="x", padx=10, pady=(0, 10))  # Pegado abajo
-        # Botones pequeños con iconos (cuadrados, sin texto o con tooltip)
-        btn_config = ctk.CTkButton(self.bottom_buttons_frame, text="",  # Sin texto, solo icono
-                                image=self.config_icon, fg_color=COLOR_FRAME, width=40, height=40, corner_radius=5,
-                                command=lambda: self.open_config_window())
-        btn_config.pack(side="left", padx=1)  # Alineados horizontalmente
-        btn_ayuda = ctk.CTkButton(self.bottom_buttons_frame, text="",  # Sin texto, solo icono
-                                image=self.help_icon, fg_color=COLOR_FRAME, width=40, height=40, corner_radius=5,
-                                command=lambda: self.open_help_window())
-        btn_ayuda.pack(side="left", padx=1)
-
     def toggle_menu(self):
         if self.menu_visible:
-            self.menu_frame.pack_forget()
+            self.sidebar.pack_forget()
             self.menu_visible = False
             self.toggle_button.configure(text=">>")
         else:
-            self.menu_frame.pack(side="left", fill="y", before=self.content_frame)
+            self.sidebar.pack(side="left", fill="y", before=self.content_frame)
             self.menu_visible = True
             self.toggle_button.configure(text="<<")
 
     def show_frame(self, name):
+        # Actualizar sidebar activo
+        self.sidebar.update_active_button(name)
+        
         for f in self.frames.values():
             f.pack_forget()
             f.grid_forget()
@@ -151,7 +210,7 @@ class MainApp(ctk.CTk):
                 self.clear_menu2()
                 self.sub_menu_active = False
                 self.sub_menu_active2 = False
-                
+
     def setup_sub_menu(self):  # Para Vectores
         if hasattr(self, 'sub_menu_frame') and self.sub_menu_frame.winfo_exists():
             if not self.sub_menu_visible:
@@ -275,7 +334,6 @@ class MainApp(ctk.CTk):
         self.update_sub_menu2(self.current_subframe)
         self.sub_menu_visible2 = True
 
-
     def toggle_sub_menu(self):
         if self.sub_menu_visible:
             self.sub_menu_frame.place_forget()
@@ -339,90 +397,22 @@ class MainApp(ctk.CTk):
         self.sub_menu_visible2 = True
 
     def open_config_window(self):
-        # Crear ventana emergente
+        # Placeholder: Reemplaza con tu código de ventana de configuración
         config_window = ctk.CTkToplevel(self)
         config_window.title("Configuración")
-        config_window.geometry("400x500")  # Ajusta tamaño según contenido
-        config_window.resizable(False, False)
-        config_window.transient(self)  # Hace que sea dependiente de la ventana principal
-        config_window.grab_set()  # Bloquea interacción con la principal hasta cerrar (opcional, quítalo si quieres no modal)
+        config_window.geometry("400x300")
+        ctk.CTkLabel(config_window, text="Ventana de Configuración").pack(pady=20)
+        ctk.CTkButton(config_window, text="Cerrar", command=config_window.destroy).pack()
 
-        # Título
-        title_label = ctk.CTkLabel(config_window, text="Configuración de la App", font=ctk.CTkFont(size=16, weight="bold"))
-        title_label.pack(pady=10)
-
-        # Opción 1: Cambiar Tema
-        theme_frame = ctk.CTkFrame(config_window, fg_color=COLOR_FRAME)
-        theme_frame.pack(fill="x", padx=20, pady=5)
-        ctk.CTkLabel(theme_frame, text="Tema:").pack(side="left", padx=10)
-        theme_switch = ctk.CTkSwitch(theme_frame, text="Modo Oscuro", command=self.toggle_theme)
-        theme_switch.pack(side="right", padx=10)
-        # Configura el switch según el tema actual
-        current_mode = ctk.get_appearance_mode()
-        theme_switch.select() if current_mode == "dark" else theme_switch.deselect()
-
-        # Opción 2: Personalizar Color de Fondo (ejemplo simple con slider para un componente RGB)
-        color_frame = ctk.CTkFrame(config_window, fg_color=COLOR_FRAME)
-        color_frame.pack(fill="x", padx=20, pady=5)
-        ctk.CTkLabel(color_frame, text="Color de Fondo (Rojo):").pack(pady=5)
-        color_slider = ctk.CTkSlider(color_frame, from_=0, to=255, command=self.update_bg_color)
-        color_slider.pack(pady=5)
-        # Nota: Para RGB completo, agrega más sliders y combina valores.
-
-        # Opción 3: Tamaño de Fuente
-        font_frame = ctk.CTkFrame(config_window, fg_color=COLOR_FRAME)
-        font_frame.pack(fill="x", padx=20, pady=5)
-        ctk.CTkLabel(font_frame, text="Tamaño de Fuente:").pack(pady=5)
-        font_slider = ctk.CTkSlider(font_frame, from_=10, to=20, command=self.update_font_size)
-        font_slider.pack(pady=5)
-
-        # Botones de Acción
-        buttons_frame = ctk.CTkFrame(config_window, fg_color="transparent")
-        buttons_frame.pack(fill="x", padx=20, pady=20)
-        save_btn = ctk.CTkButton(buttons_frame, text="Guardar", command=self.save_config)
-        save_btn.pack(side="left", padx=5)
-        reset_btn = ctk.CTkButton(buttons_frame, text="Resetear", fg_color="orange", command=self.reset_config)
-        reset_btn.pack(side="left", padx=5)
-        close_btn = ctk.CTkButton(buttons_frame, text="Cerrar", fg_color="red", command=config_window.destroy)
-        close_btn.pack(side="right", padx=5)
-        
-
-    #Ventana de ayuda
     def open_help_window(self):
+        # Placeholder: Reemplaza con tu código de ventana de ayuda
         help_window = ctk.CTkToplevel(self)
         help_window.title("Ayuda")
-        help_window.geometry("500x400")
-        help_window.resizable(False, False)
-        help_window.transient(self)
+        help_window.geometry("400x300")
+        ctk.CTkLabel(help_window, text="Ventana de Ayuda").pack(pady=20)
+        ctk.CTkButton(help_window, text="Cerrar", command=help_window.destroy).pack()
 
-        title_label = ctk.CTkLabel(help_window, text="Ayuda - Calculadora de Álgebra Lineal", font=ctk.CTkFont(size=16, weight="bold"))
-        title_label.pack(pady=10)
-
-        # Contenido scrollable
-        scrollable_frame = ctk.CTkScrollableFrame(help_window, width=450, height=300)
-        scrollable_frame.pack(padx=20, pady=10)
-
-        # Texto de ayuda (ejemplo; personalízalo)
-        help_text = """
-        Bienvenido a la Calculadora de Álgebra Lineal.
-
-        - Menu: Vista principal.
-        - Matrices: Operaciones como suma, multiplicación, inversa, etc.
-        - Vectores: Cálculos con vectores, ecuaciones, etc.
-        - Errores: Revisa logs de errores.
-
-        Para usar: Selecciona una sección y sigue los submenús.
-
-        Preguntas frecuentes:
-        - ¿Cómo resolver una matriz? Ve a Matrices > Solucion Matrices.
-        - Contacto: soporte@tuapp.com
-        """
-        help_label = ctk.CTkLabel(scrollable_frame, text=help_text, wraplength=400, justify="left")
-        help_label.pack(pady=10)
-
-        close_btn = ctk.CTkButton(help_window, text="Cerrar", command=help_window.destroy)
-        close_btn.pack(pady=10)
-    
 if __name__ == "__main__":
     app = MainApp()
     app.mainloop()
+
