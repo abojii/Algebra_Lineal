@@ -74,7 +74,7 @@ class Sidebar(ctk.CTkFrame):
         section2 = ctk.CTkLabel(self, text="HERRAMIENTAS", font=("Segoe UI", 12), text_color=COLOR_SUBTEXT)
         section2.pack(pady=(5, 5), padx=10, anchor="w")
 
-        self.btn_config = SidebarButton(self, "Configuración", self.config_icon, command=lambda: self.main_app.open_config_window())
+        self.btn_config = SidebarButton(self, "Configuración", self.config_icon, command=lambda: self.main_app.show_frame("config"))
         self.btn_ayuda = SidebarButton(self, "Ayuda", self.help_icon, command=lambda: self.main_app.open_help_window())
 
         self.buttons_herramientas = [self.btn_config, self.btn_ayuda]
@@ -95,3 +95,6 @@ class Sidebar(ctk.CTkFrame):
             self.btn_vectores.activate()
         elif frame_name == "error":
             self.btn_errores.activate()
+        elif frame_name == "config":
+            self.btn_config.activate()
+     
