@@ -1,9 +1,4 @@
-# Colores (estos ahora se definen en un diccionario de temas)
-# Nota: He movido los colores a un diccionario de temas para facilitar el cambio dinámico.
-# Los colores originales del tema oscuro se mantienen como base.
-
 import customtkinter as ctk
-
 # Definición de temas con colores personalizados
 themes = {
     "Oscuro": {
@@ -12,7 +7,13 @@ themes = {
         "text": "#ffffff",
         "subtext": "#bbbbbb",
         "button": "#3b82f6",
-        "entry": "#3a3a4f"
+        "entry": "#3a3a4f",
+        "sidebar_bg": "#1A202C",
+        "sidebar_hover": "#1F2937",
+        "sidebar_active": "#2563EB",
+        "sidebar_text": "#E5E7EB",
+        "sidebar_subtext": "#9CA3AF",
+        "sidebar_separator": "#1A2234"
     },
     "Claro": {
         "bg": "#f0f0f0",
@@ -20,7 +21,13 @@ themes = {
         "text": "#000000",
         "subtext": "#666666",
         "button": "#007bff",
-        "entry": "#e9ecef"
+        "entry": "#e9ecef",
+        "sidebar_bg": "#e0e0e0",
+        "sidebar_hover": "#cccccc",
+        "sidebar_active": "#0056b3",
+        "sidebar_text": "#000000",
+        "sidebar_subtext": "#555555",
+        "sidebar_separator": "#aaaaaa"
     },
     "Neutro": {
         "bg": "#f5f5f5",
@@ -28,12 +35,15 @@ themes = {
         "text": "#333333",
         "subtext": "#777777",
         "button": "#6c757d",
-        "entry": "#d1ecf1"
+        "entry": "#d1ecf1",
+        "sidebar_bg": "#d0d0d0",
+        "sidebar_hover": "#b0b0b0",
+        "sidebar_active": "#4a90e2",
+        "sidebar_text": "#333333",
+        "sidebar_subtext": "#666666",
+        "sidebar_separator": "#999999"
     }
 }
-
-# Para compatibilidad, puedes mantener las constantes apuntando al tema actual, pero como cambian dinámicamente, las usaremos directamente del diccionario.
-# Si prefieres, puedes actualizar estas constantes globalmente, pero para simplicidad, las usamos del diccionario.
 
 class ConfiguracionesDashboard:
     def __init__(self, parent, apply_settings_callback):
@@ -175,9 +185,9 @@ class ConfiguracionesDashboard:
                                           command=self.guardar_todo)
         self.btn_save_all.grid(row=0, column=2, padx=(5, 0), pady=10)
 
-    def update_theme(self):
+    def update_theme(self, colors):
         """Actualiza los colores de todos los widgets en este frame según el tema actual."""
-        theme = themes[self.current_theme]
+        theme = colors  # 'colors' es el diccionario pasado desde MainApp
         
         # Parent
         self.parent.configure(fg_color=theme["bg"])
@@ -226,8 +236,8 @@ class ConfiguracionesDashboard:
         tema_map = {"Claro": "light", "Neutro": "system", "Oscuro": "dark"}
         modo = tema_map.get(value, "system")
         ctk.set_appearance_mode(modo)
-        self.update_theme()  # Actualiza los colores personalizados en este frame
-        self.apply_settings_callback({"tema": modo})  # Aquí puedes modificar para pasar también los colores si es necesario
+        self.update_theme(themes[self.current_theme])  # Actualiza localmente
+        self.apply_settings_callback({"tema": themes[self.current_theme]})
 
     def actualizar_precision_label(self, value):
         self.precision_label.configure(text=f"Decimales: {int(value)}")
@@ -254,7 +264,7 @@ class ConfiguracionesDashboard:
     def guardar_todo(self):
         # Forzar guardar todos los valores actuales
         self.apply_settings_callback({
-            "tema": {"Claro": "light", "Neutro": "system", "Oscuro": "dark"}.get(self.tema_var.get(), "system"),
+            "tema": themes[self.tema_var.get()],
             "precision": self.precision_var.get(),
             "idioma": self.idioma_var.get(),
             "notificaciones": self.notif_var.get()

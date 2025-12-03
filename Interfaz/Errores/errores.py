@@ -5,6 +5,7 @@ from tkinter import messagebox
 
 from Interfaz.Errores.calculos_notacion import PositionalNotation
 from Interfaz.Errores.errores_numericos import NumericalErrors
+from Interfaz.Errores.metodonumerico2 import NumericalMethodsCalculator
 
 # ===== Colores personalizados =====
 COLOR_BG = "#1e1e2f"
@@ -269,6 +270,10 @@ class Errores(ctk.CTkFrame):
             elif name == "Err":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 frame = ErrorCalculator(self.sub_frames[name])
+                frame.pack(fill="both", expand=True)
+            elif name == "metoNum":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                frame = NumericalMethodsCalculator(self.sub_frames[name])
                 frame.pack(fill="both", expand=True)
             else:
                 print("NO SE ABRIO")

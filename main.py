@@ -11,31 +11,20 @@ from Interfaz.config import ConfiguracionesDashboard
 # Diccionario de temas (debe coincidir con el de ConfiguracionesDashboard para consistencia)
 themes = {
     "Oscuro": {
-        "bg": "#1e1e2f",
-        "frame": "#2b2b40",
-        "text": "#ffffff",
-        "subtext": "#bbbbbb",
-        "button": "#3b82f6",
-        "entry": "#3a3a4f"
+        "bg": "#1e1e2f", "frame": "#2b2b40", "text": "#ffffff", "subtext": "#bbbbbb", "button": "#3b82f6", "entry": "#3a3a4f",
+        "sidebar_bg": "#1A202C", "sidebar_hover": "#1F2937", "sidebar_active": "#2563EB", "sidebar_text": "#E5E7EB", "sidebar_subtext": "#9CA3AF", "sidebar_separator": "#1A2234"
     },
     "Claro": {
-        "bg": "#f0f0f0",
-        "frame": "#ffffff",
-        "text": "#000000",
-        "subtext": "#666666",
-        "button": "#007bff",
-        "entry": "#e9ecef"
+        "bg": "#f0f0f0", "frame": "#ffffff", "text": "#000000", "subtext": "#666666", "button": "#007bff", "entry": "#e9ecef",
+        "sidebar_bg": "#e0e0e0", "sidebar_hover": "#cccccc", "sidebar_active": "#0056b3", "sidebar_text": "#000000", "sidebar_subtext": "#555555", "sidebar_separator": "#aaaaaa"
     },
     "Neutro": {
-        "bg": "#f5f5f5",
-        "frame": "#e0e0e0",
-        "text": "#333333",
-        "subtext": "#777777",
-        "button": "#6c757d",
-        "entry": "#d1ecf1"
+        "bg": "#f5f5f5", "frame": "#e0e0e0", "text": "#333333", "subtext": "#777777", "button": "#6c757d", "entry": "#d1ecf1",
+        "sidebar_bg": "#d0d0d0", "sidebar_hover": "#b0b0b0", "sidebar_active": "#4a90e2", "sidebar_text": "#333333", "sidebar_subtext": "#666666", "sidebar_separator": "#999999"
     }
 }
 
+      
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
@@ -60,7 +49,7 @@ class MainApp(ctk.CTk):
         self.toggle_button.pack(pady=10, padx=5)
 
         # Sidebar
-        self.sidebar = Sidebar(self, self)
+        self.sidebar = Sidebar(self, self, colors=self.colors)  # Pasa self.colors
         self.sidebar.pack(side="left", fill="y")
         
         self.border_frame = ctk.CTkFrame(self, fg_color="#374151", corner_radius=0)  # Borde fijo
@@ -104,14 +93,11 @@ class MainApp(ctk.CTk):
         self.menu_visible = True
 
     def apply_settings(self, settings):
-        """Método para aplicar configuraciones globales desde ConfiguracionesDashboard."""
         if "tema" in settings:
-            # Actualizar colores y aplicar tema
             self.colors = settings["tema"].copy()
-            tema_map = {"Claro": "light", "Neutro": "system", "Oscuro": "dark"}
-            modo = tema_map.get(list(themes.keys())[list(themes.values()).index(settings["tema"])], "dark")  # Encuentra el modo basado en colores
-            ctk.set_appearance_mode(modo)
             self.update_all_themes()
+      # ... (resto igual para precision, idioma, notificaciones)
+  
         
         if "precision" in settings:
             self.precision = settings["precision"]
@@ -159,14 +145,14 @@ class MainApp(ctk.CTk):
         # Forzar redibujo
         self.update_idletasks()
 
-    # Resto del código permanece igual...
     def toggle_menu(self):
         if self.menu_visible:
             self.sidebar.pack_forget()
             self.menu_visible = False
             self.toggle_button.configure(text=">>")
         else:
-            self.sidebar.pack(side="left", fill="y", before=self.content_frame)
+            self.sidebar.pack(side="left", fill="y")
+            self.sidebar.pack_configure(before=self.border_frame)
             self.menu_visible = True
             self.toggle_button.configure(text="<<")
 
@@ -189,7 +175,7 @@ class MainApp(ctk.CTk):
             self.setup_submenu("matrices", "Submenú Matrices", [("Solucion Matrices", "principal"), ("Operaciones con Matrices", "sub1"), ("Matriz Traspuesta", "sub_traspuesta"), ("Propiedades", "Propiedades"), ("Matriz Inversa", "Inversa"), ("Determinante Matriz", "DeterminanteMa")])
             self.submenus["matrices"].show()
         elif name == "error":
-            self.setup_submenu("errores", "Submenú Matrices", [("Notacion Posicional", "NotaPosi"), ("Conseptos de Error", "ConsepEr"), ("Errores", "Err")])
+            self.setup_submenu("errores", "Submenú Matrices", [("Notacion Posicional", "NotaPosi"), ("Conseptos de Error", "ConsepEr"), ("Errores", "Err"), ("Metodos Numericos","metoNum")])
             self.submenus["errores"].show()
         else:
             self.clear_submenus()
