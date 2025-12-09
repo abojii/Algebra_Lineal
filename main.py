@@ -172,7 +172,7 @@ class MainApp(ctk.CTk):
             self.setup_submenu("vectores", "Submenú Vectores", [("Matriz-Vector (Ax)", "principal"), ("Ecuación Vectorial", "sub1"), ("Propiedades algebraicas de ℝⁿ", "sub2"), ("Ecuaciones Homogéneas", "sub3")])
             self.submenus["vectores"].show()
         elif name == "calc":
-            self.setup_submenu("matrices", "Submenú Matrices", [("Solucion Matrices", "principal"), ("Operaciones con Matrices", "sub1"), ("Matriz Traspuesta", "sub_traspuesta"), ("Propiedades", "Propiedades"), ("Matriz Inversa", "Inversa"), ("Determinante Matriz", "DeterminanteMa")])
+            self.setup_submenu("matrices", "Submenú Matrices", [("Solucion Matrices", "principal"), ("Operaciones con Matrices", "sub1"), ("Matriz Traspuesta", "sub_traspuesta"), ("Propiedades", "Propiedades"), ("Matriz Inversa", "Inversa"), ("Determinante Matriz", "DeterminanteMa"),("Propiedades2", "Ppp")])
             self.submenus["matrices"].show()
         elif name == "error":
             self.setup_submenu("errores", "Submenú Matrices", [("Notacion Posicional", "NotaPosi"), ("Conseptos de Error", "ConsepEr"), ("Errores", "Err"), ("Metodos Numericos","metoNum")])
@@ -212,7 +212,7 @@ class MainApp(ctk.CTk):
 
     def show_sub_submenu_matrices(self):
         self.clear_submenu("matrices")
-        self.submenus["matrices_props"] = SubMenu(self.content_frame, "Propiedades Matrices", [("Propiedad Matrices", "Propiedades"), ("Propiedades Traspuesta", "Ptraspuesta"), ("Propiedades Determinantes", "DeterPropiedades")], lambda n: self.change_subframe("matrices", n), lambda: self.volver_submenu_principal())
+        self.submenus["matrices_props"] = SubMenu(self.content_frame, "Propiedades Matrices", [("Propiedad Matrices", "Propiedades"), ("Propiedades Traspuesta", "Ptraspuesta"), ("Propiedades Determinantes", "DeterPropiedades"),("Propiedades2", "Ppp")], lambda n: self.change_subframe("matrices", n), lambda: self.volver_submenu_principal())
 
     def volver_submenu_principal(self):
         self.clear_submenu("matrices_props")

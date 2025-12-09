@@ -70,9 +70,12 @@ class SubMenu:
 
     def update_active(self, active_name):
         for btn in self.buttons.values():
-            btn.configure(fg_color=COLOR_BUTTON)
+            if btn.winfo_exists():  # Verifica si el botón aún existe
+                btn.configure(fg_color=COLOR_BUTTON)
         if active_name in self.buttons:
-            self.buttons[active_name].configure(fg_color="#60a5fa")
+            btn = self.buttons[active_name]
+            if btn.winfo_exists():  # Verifica si el botón activo aún existe
+                btn.configure(fg_color="#60a5fa")
 
     def clear(self):
         if self.frame and self.frame.winfo_exists():

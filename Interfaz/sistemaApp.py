@@ -11,85 +11,104 @@ from Interfaz.Matrices.Inversa import MatrixInverseApp
 from Interfaz.Matrices.propiedadesMultiplicacion import VectorSpaceProperties
 from Interfaz.Matrices.propiedadesTraspuesta import MatrixTransposeProperties# Ajusta si es necesario
 
+
+
+import tkinter as tk  # Para messagebox y otros si es necesario
+
+# Configuración de CustomTkinter
+ctk.set_appearance_mode("light")
+ctk.set_default_color_theme("blue")
+
+# Definición de colores
+COLOR_BG = "#1e1e2f"
+COLOR_FRAME = "#2b2b40"
+COLOR_TEXT = "#ffffff"
+COLOR_SUBTEXT = "#bbbbbb"
+COLOR_BUTTON = "#3b82f6"
+COLOR_ENTRY = "#3a3a4f"
+COLOR_BUTTON1 = "#f87171"
+COLOR_BUTTON2 = "#4ade80"
+
 class SistemaEcuacionesApp:
     def __init__(self, parent):
         self.parent = parent
-        # Configura el fondo del parent explícitamente (en lugar de bg)
-        self.parent.configure(fg_color=COLOR_BG)
-        self.metodo_var = ctk.StringVar(value="gauss")
+        self.metodo_var = tk.StringVar(value="gauss")
 
-        # Título
-        titulo = ctk.CTkLabel(self.parent, text="Calculadora de Álgebra Lineal",
-                              font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"),
-                              text_color=COLOR_BUTTON, fg_color="transparent")  # fg_color="transparent" para no sombrear el parent
+        titulo = ctk.CTkLabel(parent, text="Calculadora de Álgebra Lineal",
+                              font=("Segoe UI", 18, "bold"),
+                              text_color=COLOR_TEXT)
         titulo.pack(pady=10)
 
-        # Subtítulo
-        subtitulo = ctk.CTkLabel(self.parent,
+        subtitulo = ctk.CTkLabel(parent,
                                  text="Resuelve sistemas de ecuaciones lineales",
-                                 font=ctk.CTkFont(family="Segoe UI", size=10),
-                                 text_color=COLOR_SUBTEXT, fg_color="transparent")
+                                 font=("Segoe UI", 10),
+                                 text_color=COLOR_SUBTEXT)
         subtitulo.pack()
 
-        # Frame de configuración
-        frame_config = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
+        frame_config = ctk.CTkFrame(parent, fg_color=COLOR_FRAME, border_width=1)
         frame_config.pack(fill="x", padx=20, pady=15)
 
         ctk.CTkLabel(frame_config, text="Tamaño de la Matriz:",
-                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=12), fg_color="transparent").grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                     text_color=COLOR_SUBTEXT).grid(row=0, column=0, padx=10, pady=10)
 
-        self.matriz_combo = ctk.CTkOptionMenu(frame_config, values=["2x2", "3x3", "4x4"], width=80)
+        self.matriz_combo = ctk.CTkComboBox(frame_config, values=["2x2", "3x3", "4x4"], width=100,
+                                            fg_color=COLOR_ENTRY, text_color=COLOR_TEXT)
         self.matriz_combo.set("2x2")
         self.matriz_combo.grid(row=0, column=1, padx=5, pady=10)
 
         ctk.CTkButton(frame_config, text="Generar", command=self.generar_campos,
-                      fg_color=COLOR_BUTTON, text_color="white", width=80, height=30).grid(row=0, column=2, padx=5, pady=10)
+                      fg_color=COLOR_BUTTON, text_color=COLOR_TEXT).grid(row=0, column=2, padx=5)
         ctk.CTkButton(frame_config, text="Resolver", command=self.resolver,
-                      fg_color=COLOR_BUTTON, text_color="white", width=80, height=30).grid(row=0, column=3, padx=5, pady=10)
+                      fg_color=COLOR_BUTTON2, text_color="black").grid(row=0, column=3, padx=5)
         ctk.CTkButton(frame_config, text="Limpiar", command=self.limpiar,
-                      fg_color=COLOR_BUTTON, text_color="white", width=80, height=30).grid(row=0, column=4, padx=5, pady=10)
+                      fg_color=COLOR_BUTTON1, text_color=COLOR_TEXT).grid(row=0, column=4, padx=5)
 
-        # Frame de métodos
-        frame_metodos = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
+        frame_metodos = ctk.CTkFrame(parent, fg_color=COLOR_FRAME, border_width=1)
         frame_metodos.pack(padx=20, pady=1, fill="x")
 
-        ctk.CTkLabel(frame_metodos, text="Método de resolución", text_color=COLOR_SUBTEXT,
-                     font=ctk.CTkFont(size=12), fg_color="transparent").grid(row=0, column=0, columnspan=2, sticky='w', pady=(10, 5), padx=10)
+        ctk.CTkLabel(frame_metodos, text="Método de resolución", text_color=COLOR_SUBTEXT).grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 5))
 
-        # Radio buttons (sin selected_color, con fg_color y border_color)
-        ctk.CTkRadioButton(frame_metodos, text="Eliminación Gaussiana",
-                           variable=self.metodo_var, value="gauss",
-                           fg_color=COLOR_FRAME, text_color=COLOR_TEXT,
-                           border_color=COLOR_BUTTON, radiobutton_width=20, radiobutton_height=20).grid(row=1, column=0, sticky='w', padx=15, pady=5)
-        ctk.CTkRadioButton(frame_metodos, text="Eliminación Gauss-Jordan",
-                           variable=self.metodo_var, value="gaussjordan",
-                           fg_color=COLOR_FRAME, text_color=COLOR_TEXT,
-                           border_color=COLOR_BUTTON, radiobutton_width=20, radiobutton_height=20).grid(row=2, column=0, sticky='w', padx=15, pady=5)
-        ctk.CTkRadioButton(frame_metodos, text="Escalonada Matriz",
-                           variable=self.metodo_var, value="Escalonada Matriz",
-                           fg_color=COLOR_FRAME, text_color=COLOR_TEXT,
-                           border_color=COLOR_BUTTON, radiobutton_width=20, radiobutton_height=20).grid(row=3, column=0, sticky='w', padx=15, pady=5)
-        ctk.CTkRadioButton(frame_metodos, text="Escalonada Reducida Matriz",
-                           variable=self.metodo_var, value="Escalonada Reducida",
-                           fg_color=COLOR_FRAME, text_color=COLOR_TEXT,
-                           border_color=COLOR_BUTTON, radiobutton_width=20, radiobutton_height=20).grid(row=4, column=0, sticky='w', padx=15, pady=5)
+        self.radio_gauss = ctk.CTkRadioButton(frame_metodos, text="Eliminación Gaussiana",
+                                             variable=self.metodo_var, value="gauss",
+                                             text_color=COLOR_TEXT, fg_color=COLOR_BUTTON)
+        self.radio_gauss.grid(row=1, column=0, sticky='w', padx=5, pady=2)
 
-        # Frame para el sistema
-        self.frame_sistema = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
+        self.radio_gaussjordan = ctk.CTkRadioButton(frame_metodos, text="Eliminación Gauss-Jordan",
+                                                   variable=self.metodo_var, value="gaussjordan",
+                                                   text_color=COLOR_TEXT, fg_color=COLOR_BUTTON)
+        self.radio_gaussjordan.grid(row=2, column=0, sticky='w', padx=5, pady=2)
+
+        self.radio_escalonada = ctk.CTkRadioButton(frame_metodos, text="Escalonada Matriz",
+                                                  variable=self.metodo_var, value="Escalonada Matriz",
+                                                  text_color=COLOR_TEXT, fg_color=COLOR_BUTTON)
+        self.radio_escalonada.grid(row=3, column=0, sticky='w', padx=5, pady=2)
+
+        self.radio_reducida = ctk.CTkRadioButton(frame_metodos, text="Escalonada Reducida Matriz",
+                                                variable=self.metodo_var, value="Escalonada Reducida",
+                                                text_color=COLOR_TEXT, fg_color=COLOR_BUTTON)
+        self.radio_reducida.grid(row=1, column=1, sticky='w', padx=5, pady=2)
+
+        self.frame_sistema = ctk.CTkFrame(parent, fg_color=COLOR_FRAME, border_width=1)
         self.frame_sistema.pack(fill="both", padx=20, pady=15, expand=True)
 
         self.entries = []
 
         # Frame para resultados
-        frame_result = ctk.CTkFrame(self.parent, fg_color=COLOR_FRAME, corner_radius=0)
-        ctk.CTkLabel(frame_result, text="Resultado", text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=14, weight="bold"), fg_color="transparent").pack(pady=(10, 5), padx=10, anchor="w")
+        frame_result = ctk.CTkFrame(parent, fg_color=COLOR_FRAME, border_width=1)
         frame_result.pack(padx=20, pady=10, fill="both", expand=True)
 
-        self.result_text = ctk.CTkTextbox(frame_result, height=300, fg_color=COLOR_BG, text_color=COLOR_TEXT,
-                                          corner_radius=10, scrollbar_button_color=COLOR_BUTTON, scrollbar_button_hover_color=COLOR_BUTTON)
-        self.result_text.pack(fill="both", expand=True, padx=10, pady=10)  # Cambié side="left" a fill="both" para mejor ajuste
+        # Etiqueta para el frame
+        ctk.CTkLabel(frame_result, text="Resultado", text_color=COLOR_SUBTEXT).pack(anchor="w", padx=10, pady=5)
 
-    # Los métodos restantes (generar_campos, resolver, etc.) permanecen iguales, ya que no usan bg
+        # Cuadro de texto con scrollbar
+        self.result_text = ctk.CTkTextbox(frame_result, height=15, wrap="word",
+                                         fg_color=COLOR_ENTRY, text_color=COLOR_TEXT)
+        self.result_text.pack(side="left", fill="both", expand=True)
+
+        scroll = ctk.CTkScrollbar(frame_result, command=self.result_text.yview)
+        scroll.pack(side="right", fill="y")
+        self.result_text.configure(yscrollcommand=scroll.set)
+
     def generar_campos(self):
         for widget in self.frame_sistema.winfo_children():
             widget.destroy()
@@ -105,20 +124,20 @@ class SistemaEcuacionesApp:
             return
 
         ctk.CTkLabel(self.frame_sistema, text=f"Ingrese los coeficientes de A ({filas}x{columnas}) y b ({filas}x1):",
-                     text_color=COLOR_SUBTEXT, font=ctk.CTkFont(size=12), fg_color="transparent").pack(anchor="w", padx=10, pady=5)
+                     text_color=COLOR_SUBTEXT).pack(anchor="w", padx=10, pady=5)
 
-        grid = ctk.CTkFrame(self.frame_sistema, fg_color=COLOR_FRAME, corner_radius=0)
+        grid = ctk.CTkFrame(self.frame_sistema, fg_color=COLOR_FRAME)
         grid.pack(pady=10)
 
         for i in range(filas):
             fila = []
             for j in range(columnas):
-                e = ctk.CTkEntry(grid, width=60, height=30, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT,
-                                 placeholder_text="", corner_radius=5)
+                e = ctk.CTkEntry(grid, width=50, justify="center",
+                                 fg_color=COLOR_ENTRY, text_color=COLOR_TEXT)
                 e.grid(row=i, column=j, padx=5, pady=5)
                 fila.append(e)
-            e = ctk.CTkEntry(grid, width=60, height=30, fg_color=COLOR_ENTRY, text_color=COLOR_TEXT,
-                             placeholder_text="", corner_radius=5)
+            e = ctk.CTkEntry(grid, width=50, justify="center",
+                             fg_color=COLOR_ENTRY, text_color=COLOR_TEXT)
             e.grid(row=i, column=columnas, padx=5, pady=5)
             fila.append(e)
             self.entries.append(fila)
@@ -129,45 +148,44 @@ class SistemaEcuacionesApp:
             messagebox.showwarning("Atención", "Primero genera el sistema.")
             return
         try:
-            self._resolver(metodo)
+            filas = len(self.entries)
+            columnas = len(self.entries[0]) - 1
+            A = []
+            b = []
+            for fila in self.entries:
+                A.append([float(fila[j].get()) for j in range(columnas)])
+                b.append(float(fila[columnas].get()))
+
+            pasos, solucion, clasificacion = [], None, ""
+
+            if metodo == "gauss":
+                pasos, solucion, clasificacion = sistema_ecuaciones.gauss(A, b)
+            elif metodo == "gaussjordan":
+                pasos, solucion, clasificacion = sistema_ecuaciones.gauss_jordan(A, b)
+            elif metodo == "Escalonada Matriz":
+                pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada(A, b)
+            elif metodo == "Escalonada Reducida":
+                pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada_reducida(A, b)
+
+            resultado = "\n".join(pasos)
+            if solucion is not None:
+                resultado += f"\n\nSolución: {solucion}"
+            resultado += f"\n\nClasificación: {clasificacion}"
+
+            self.result_text.delete(1.0, tk.END)   # Limpia antes de mostrar
+            self.result_text.insert(tk.END, resultado)
+
         except ValueError:
             messagebox.showerror("Error", "Por favor ingrese solo números.")
-
-    def _resolver(self, metodo):
-        filas = len(self.entries)
-        columnas = len(self.entries[0]) - 1
-        A = []
-        b = []
-        for fila in self.entries:
-            A.append([float(fila[j].get()) for j in range(columnas)])
-            b.append(float(fila[columnas].get()))
-
-        pasos, solucion, clasificacion = [], None, ""
-
-        if metodo == "gauss":
-            pasos, solucion, clasificacion = sistema_ecuaciones.gauss(A, b)
-        elif metodo == "gaussjordan":
-            pasos, solucion, clasificacion = sistema_ecuaciones.gauss_jordan(A, b)
-        elif metodo == "Escalonada Matriz":
-            pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada(A, b)
-        elif metodo == "Escalonada Reducida":
-            pasos, solucion, clasificacion = sistema_ecuaciones.forma_escalonada_reducida(A, b)
-
-        resultado = "\n".join(pasos)
-        if solucion is not None:
-            resultado += f"\n\nSolución: {solucion}"
-        resultado += f"\n\nClasificación: {clasificacion}"
-
-        self.result_text.delete("1.0", "end")
-        self.result_text.insert("end", resultado)
 
     def limpiar(self):
         for widget in self.frame_sistema.winfo_children():
             widget.destroy()
         self.entries = []
-        self.result_text.delete("1.0", "end")
- 
+        self.result_text.delete(1.0, tk.END)
 
+
+#AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 class Matrices:
     def __init__(self, parent, show_subframe_callback):
         self.parent = parent
@@ -208,6 +226,10 @@ class Matrices:
                 frame = MatrixInverseApp(self.sub_frames[name])
                 frame.pack(fill="both", expand=True)
             elif name == "Propiedades":
+                self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
+                frame = VectorSpaceProperties(self.sub_frames[name])
+                frame.pack(fill="both", expand=True)
+            elif name == "Ppp":
                 self.sub_frames[name] = ctk.CTkFrame(self.sub_content_frame, fg_color=COLOR_BG, corner_radius=0)
                 frame = VectorSpaceProperties(self.sub_frames[name])
                 frame.pack(fill="both", expand=True)
